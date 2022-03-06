@@ -1,0 +1,9 @@
+Agile Project Management
+1. Milestones
+2. Prototyping
+3. Gantt Chart
+4. Timeline
+
+
+NOTES:
+Limit to software development

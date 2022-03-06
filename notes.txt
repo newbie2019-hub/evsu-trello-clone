@@ -1,0 +1,58 @@
+Users
+  - email
+  - password
+  - Basic Info (First Name, Middle Name, Last Name)
+  - Avatar (Prof Pic)
+  - address
+  - birthdate
+  - contact_number
+
+# Projects
+   - Name
+   - Start Date
+   - Delivery Date
+   - Description
+
+  # Tasks
+      - project_id
+      - Name
+      - description
+      - status
+      - type (feature, issue)
+      - user_id
+      - start_date
+      - end_date
+      - card_id
+
+     #Task_Assignee
+       - task_id
+       - user_id
+
+     #Task Comment
+       - task_id
+       - comment
+       - user_id
+       - image
+
+ #Sprint
+    - project_id
+    - sprintname
+ 
+   #Sprint_task
+      - sprint_id
+      - task_id
+
+ #Board
+     - project_id
+     - name
+     - card header color
+     - description
+
+  # Project_Members
+      - user_id
+      - project_id
+
+
+NOTES
+Should be similar to Trello features
+Gantt Chart
