@@ -15,11 +15,12 @@
      <v-slide-group multiple show-arrows class="mt-5">
       <v-slide-item v-for="(member, i) in selected_project.members" :key="i" v-slot="{}">
        <v-btn small fab elevation="0" class="ml-1">
-        <v-avatar size="40" color="primary"
-         ><span class="white--text">{{ member.info.first_name[0] }}{{ member.info.last_name[0] }}</span></v-avatar
-        >
+        <v-avatar size="40" color="primary"><span class="white--text">{{ member.info.first_name[0] }}{{ member.info.last_name[0] }}</span></v-avatar>
        </v-btn>
       </v-slide-item>
+      <v-btn small fab elevation="0" class="ml-1">
+        <v-avatar size="40" color="primary"><span class="white--text">{{ selected_project.owner.info.first_name[0] }}{{ selected_project.owner.info.last_name[0] }}</span></v-avatar>
+      </v-btn>
       <v-btn small fab elevation="0" class="dashed-border ml-1">
        <v-icon> mdi-plus </v-icon>
       </v-btn>

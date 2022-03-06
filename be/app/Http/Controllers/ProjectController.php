@@ -14,7 +14,7 @@ class ProjectController extends Controller
     }
 
     public function index(){
-        $project = Project::where('user_id', auth()->user()->id)->with([
+        $project = Project::whereRelation('members', 'user_id', auth()->user()->id)->orWhere('user_id', auth()->user()->id)->with([
             'owner', 'owner.info', 'members', 'members.info', 
             'boards', 'boards.task', 'boards.task.user', 'boards.task.user.info',
             'boards.task.assignee', 'boards.task.assignee.info'
