@@ -1,6 +1,6 @@
 <template>
  <div class="notification">
-  <v-alert class="pre-formatted" :value="isVisible" border="left" :type="alertType" transition="scroll-x-transition">{{msg}}</v-alert>
+  <v-alert class="" :value="isVisible" border="left" :type="alertType" transition="scroll-x-transition">{{msg}}</v-alert>
  </div>
 </template>
 <script>
@@ -31,5 +31,6 @@ export default {
  position: fixed;
  top: 1.5rem;
  left: 1.5rem;
+ max-width: 400px;
 }
 </style>

@@ -14,14 +14,26 @@
      </p>
      <v-slide-group multiple show-arrows class="mt-5">
       <v-slide-item v-for="(member, i) in selected_project.members" :key="i" v-slot="{}">
-       <v-btn small fab elevation="0" class="ml-1">
-        <v-avatar size="40" color="primary"><span class="white--text">{{ member.info.first_name[0] }}{{ member.info.last_name[0] }}</span></v-avatar>
-       </v-btn>
+       <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+         <v-btn v-bind="attrs" v-on="on" small fab elevation="0" class="ml-1">
+          <v-avatar size="40" color="primary"
+           ><span class="white--text">{{ member.info.first_name[0] }}{{ member.info.last_name[0] }}</span></v-avatar
+          >
+         </v-btn>
+        </template>
+        <span><small>Member - {{ member.info.first_name[0] }}. {{ member.info.last_name }}</small></span>
+       </v-tooltip>
       </v-slide-item>
-      <v-btn small fab elevation="0" class="ml-1">
-        <v-avatar size="40" color="primary"><span class="white--text">{{ selected_project.owner.info.first_name[0] }}{{ selected_project.owner.info.last_name[0] }}</span></v-avatar>
-      </v-btn>
-      <v-btn small fab elevation="0" class="dashed-border ml-1">
+      <v-tooltip bottom>
+       <template v-slot:activator="{ on, attrs }">
+        <v-btn v-on="on" v-bind="attrs" small fab elevation="0" class="ml-1">
+         <v-avatar size="40" color="green darken-1"><span class="white--text">{{ selected_project.owner.info.first_name[0] }}{{ selected_project.owner.info.last_name[0] }}</span></v-avatar>
+        </v-btn>
+       </template>
+       <span class=""><small>Owner - {{ selected_project.owner.info.first_name[0] }}. {{ selected_project.owner.info.last_name }}</small></span>
+      </v-tooltip>
+      <v-btn @click.stop="addMemberDialog" small fab elevation="0" class="dashed-border ml-1">
        <v-icon> mdi-plus </v-icon>
       </v-btn>
      </v-slide-group>
@@ -164,15 +176,17 @@
        <v-tooltip bottom>
         <template v-slot:activator="{ on: tooltip }">
          <v-btn small fab elevation="0" class="ml-1" v-bind="attrs" v-on="{ ...tooltip, ...menu }">
-          <v-avatar size="40" color="primary"><span class="white--text">{{ assignee.info.first_name[0] }}{{ assignee.info.last_name[0] }}</span></v-avatar>
+          <v-avatar size="40" color="primary"
+           ><span class="white--text">{{ assignee.info.first_name[0] }}{{ assignee.info.last_name[0] }}</span></v-avatar
+          >
          </v-btn>
         </template>
-        <span>Remove</span>
+        <span>{{ assignee.info.first_name }} {{ assignee.info.last_name }}</span>
        </v-tooltip>
       </template>
       <v-list class="pa-0">
        <v-list-item class="pa-0 ma-0">
-        <v-btn  @click.prevent="removeAssignee(assignee, i)" text depressed color="red darken-1">Remove</v-btn>
+        <v-btn @click.prevent="removeAssignee(assignee, i)" text depressed color="red darken-1">Remove</v-btn>
        </v-list-item>
       </v-list>
      </v-menu>
@@ -288,13 +302,20 @@
       ></v-select>
      </v-col>
     </v-row>
+    <v-card-actions class="mt-5">
+     <v-spacer></v-spacer>
+     <v-btn color="green darken-1" text @click="taskDialog = false"> Close </v-btn>
+     <v-btn color="green darken-1" text @click.prevent="updateTask"> Save </v-btn>
+    </v-card-actions>
     <v-card-title class="text-h6 mt-2">
      <v-icon class="mr-2">mdi-comment-processing</v-icon>
      Comments
     </v-card-title>
     <v-layout>
      <v-avatar class="ml-14" size="45" color="primary"
-      ><span class="white--text">{{ `${this.user.info.first_name[0]}${this.user.info.last_name[0]}` }}</span></v-avatar
+      ><span class="white--text timeline-comment">{{
+       `${this.user.info.first_name[0]}${this.user.info.last_name[0]}`
+      }}</span></v-avatar
      >
      <v-textarea
       rows="2"
@@ -309,11 +330,10 @@
      >
      </v-textarea>
     </v-layout>
-    <v-card-actions class="mt-5">
-     <v-spacer></v-spacer>
-     <v-btn color="green darken-1" text @click="taskDialog = false"> Close </v-btn>
-     <v-btn color="green darken-1" text @click.prevent="updateTask"> Save </v-btn>
-    </v-card-actions>
+    <v-layout justify-end class="mr-7 mt-4">
+     <v-btn @click.prevent="saveComment" text color="primary">Comment</v-btn>
+    </v-layout>
+    <task-comments :comments="taskInfo.comments" />
    </v-card>
   </v-dialog>
 
@@ -328,7 +348,7 @@
      item-value="id"
      class="pl-6 pr-7"
      label="Select members to assign"
-     no-data-text="No project member is available"
+     no-data-text="No member is available"
      :menu-props="{ offsetY: true }"
      outlined
      dense
@@ -356,11 +376,16 @@
     </v-card-actions>
    </v-card>
   </v-dialog>
+
+  <add-project-member :projectId="selected_project.id" />
  </div>
 </template>
 <script>
  import draggable from 'vuedraggable';
  import { mapState } from 'vuex';
+ import TaskComments from './components/TaskComments.vue';
+ import AddProjectMember from './components/AddProjectMember.vue';
+
  export default {
   data: () => ({
    items: [
@@ -381,6 +406,7 @@
    showAddBoard: false,
    taskDialog: false,
    isLoading: false,
+   required: [(v) => !!v || 'Field is required'],
    taskTypeItem: [
     {
      text: 'Enhancement',
@@ -452,6 +478,7 @@
    if (this.selected_project.length == 0) {
     this.$router.push({ name: 'Projects' });
    }
+   console.log(this.$route);
    this.items.push({ text: this.currentRouteName, href: '', disabled: true });
   },
   computed: {
@@ -468,7 +495,7 @@
      *
      *  Bug on the index that is
      *  being removed.
-     * 
+     *
      *  --- BUG HAS BEEN FIXED ----
      *
      */
@@ -477,7 +504,7 @@
      this.taskInfo.assignee.forEach((assignee, a) => {
       if (member.info.id == assignee.user_id) {
        if (beenSpliced) {
-        console.log('Been spliced');
+        // console.log('Been spliced');
         projmembers.splice(i - 1, 1);
        } else {
         beenSpliced = true;
@@ -492,8 +519,11 @@
    ...mapState('project', ['selected_project']),
    ...mapState('auth', ['user']),
   },
-  components: { draggable },
+  components: { draggable, TaskComments, AddProjectMember },
   methods: {
+   addMemberDialog() {
+    this.$store.commit('project/SET_MEMBER_DIALOG', true);
+   },
    save(date) {
     this.$refs.deliverydate.save(date);
    },
@@ -609,9 +639,12 @@
     this.isLoading = false;
     this.dialogAssignee = false;
    },
-   async removeAssignee(assignee, i){
-    
-    const { status, data } = await this.$store.dispatch('project/removeAssignee', {assignee: assignee, data: this.taskData, assigneeIndex: i});
+   async removeAssignee(assignee, i) {
+    const { status, data } = await this.$store.dispatch('project/removeAssignee', {
+     assignee: assignee,
+     data: this.taskData,
+     assigneeIndex: i,
+    });
     if (status != 200) {
      this.showToast(data, 'error');
     }
@@ -650,6 +683,15 @@
      this.showAddIndex = null;
      this.data.name = '';
     }
+   },
+   async saveComment() {
+    const { status, data } = await this.$store.dispatch('project/storeComment', this.taskData);
+    if (status == 200) {
+     this.showToast(data.msg);
+    } else {
+     this.showToast(data, 'error');
+    }
+    this.taskData.comment = '';
    },
   },
   watch: {

@@ -31,7 +31,7 @@
         ></v-text-field>
        </v-col>
       </v-row>
-      <v-data-table :headers="headers" :items="projects" :items-per-page="10" class="mt-4">
+      <v-data-table :headers="headers" :items="projects" :search="search" :items-per-page="10" class="mt-4">
        <template v-slot:item.members="{ }">
         <v-btn x-small fab elevation="0" class="dashed-border">
          <v-icon>
@@ -209,10 +209,10 @@
    formType: 'create',
    formText: 'New Project',
   }),
-  mounted() {
+  async mounted() {
    this.isLoading = true;
    document.title = 'Projects';
-   this.getProjects();
+   await this.getProjects();
    this.isLoading = false;
   },
   computed: {

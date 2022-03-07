@@ -16,7 +16,7 @@
        <v-col xl="5" lg="5" md="6" sm="8" cols="10">
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-text-field append-icon="mdi-email" class="mt-3" hide-details="auto" v-model="data.email" :rules="emailRules" label="Email Address" required dark outlined filled dense></v-text-field>
-          <v-text-field append-icon="mdi-key" type="password" class="mt-3" hide-details="auto" v-model="data.password" :rules="required" label="Password" required dark filled outlined dense></v-text-field>
+          <v-text-field append-icon="mdi-key" type="password" @keypress.enter="login" class="mt-3" hide-details="auto" v-model="data.password" :rules="required" label="Password" required dark filled outlined dense></v-text-field>
           <p class="grey--text text--lighten-1 mt-4">
             Don't have an account? <router-link class="text-decoration-none" to="/signup">Sign-up</router-link>
           </p>
@@ -64,7 +64,7 @@ export default {
       const {status, data} = await this.$store.dispatch('auth/login', this.data)
       if(status == 200) {
         const alert = {
-          msg: `Welcome back, ${data.user_info.last_name}!`,
+          msg: `Welcome back, ${data.user_info.first_name[0]}. ${data.user_info.last_name}!`,
           isVisible: true,
           alertType: 'success'
         }

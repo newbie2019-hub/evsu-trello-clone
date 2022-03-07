@@ -5,13 +5,20 @@ export default {
   state: {
     projects: [],
     selected_project: [],
+    addMemberDialog: false,
   },
   getters: {
     GET_SELECTED_PROJECT_MEMBERS(state){
       return state.selected_project.members
+    },
+    GET_MEMBER_DIALOG(state){
+      return state.addMemberDialog
     }
   },
   mutations: {
+    SET_MEMBER_DIALOG(state, payload){
+      state.addMemberDialog = payload
+    },
     SET_PROJECTS(state, payload) {
       state.projects = payload
     },
@@ -67,7 +74,21 @@ export default {
     },
     SAVE_BOARD(state, payload){
       state.selected_project.boards.push(payload)
-    }
+    },
+
+    /**
+     *  Comment Mutations
+     * 
+     */
+     STORE_COMMENT(state, {resData: data, payload: payload}){
+        state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].comments.push(data)
+     },
+
+     ADD_PROJECT_MEMBER(state, {data: data, payload: payload}){
+       data.forEach((user, i) => {
+         state.selected_project.members.push(user.user)
+       })
+     }
   },
   actions: {
     async getProjects({ commit }) {
@@ -197,6 +218,40 @@ export default {
 
       return res;
     },
+
+    /** 
+     *  Comment Section
+     *  
+     *  - actions for the comments for the task goes 
+     *  here.
+     * 
+     */
+
+    async storeComment({commit}, payload){
+      const res = await API.post('task-comment', payload).then(res => {
+        commit('STORE_COMMENT', {resData: res.data.data, payload: payload})
+        return res;
+      }).catch(error => {
+        return error.response;
+      })
+
+      return res;
+    },
+
+    /**
+     *  Project Members Section
+     *  
+     */
+    async addMembers({commit}, payload){
+      const res = await API.post('project-member', payload).then(res => {
+        commit('ADD_PROJECT_MEMBER', {data: res.data.data, payload: payload})
+        return res;
+      }).catch(error => {
+        return error.response;
+      })
+
+      return res;
+    }
     
   }
 }
