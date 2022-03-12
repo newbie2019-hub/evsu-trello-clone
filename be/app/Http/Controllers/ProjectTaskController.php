@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TaskRequest;
+use App\Models\Board;
+use App\Models\ProjectLog;
 use App\Models\Task;
 use App\Models\TaskAssignee;
 use Illuminate\Http\Request;
@@ -26,7 +28,18 @@ class ProjectTaskController extends Controller
             'status' => 'Pending'
         ]);
 
-        $task->load('assignee', 'assignee.info');
+        $board = Board::where('id', $request->board_id)->first();
+        ProjectLog::create([
+            'name' => 'Task Created',
+            'event' => 'created',
+            'description' => auth()->user()->info->first_name . ' ' .auth()->user()->info->last_name . ' added a new task named ' . $request->task . ' on board named ' . $board->name,
+            'subject_type' => Task::class,
+            'subject_id' => $task->id,
+            'project_id' => $request->project_id,
+            'user_id' => auth()->user()->id
+        ]);
+
+        $task->load('comments', 'assignee', 'assignee.info');
         
         return $this->success('Task created successfully!', $task);
     }
@@ -59,14 +72,33 @@ class ProjectTaskController extends Controller
     }
 
     public function updateOrder(Request $request){
+        //Update all task from all boards
         foreach($request->boards as $board){
             foreach($board['task'] as $task){
-                Task::where('id', $task['id'])->update([
+               if($task['moved']){
+                   $movedTask = Task::where('id', $task['id'])->first();
+                   $previousBoard = Board::where('id', $movedTask->board_id)->first();
+
+                   ProjectLog::create([
+                       'name' => 'Task Moved',
+                       'event' => 'moved',
+                       'description' => auth()->user()->info->first_name . ' ' .auth()->user()->info->last_name . ' moved a task named '. $movedTask->task . ' from board ' . $previousBoard->name . ' to board '. $board['name'],
+                       'subject_type' => Task::class,
+                       'subject_id' => $movedTask->id,
+                       'project_id' => $request->id,
+                       'user_id' => auth()->user()->id
+                   ]);
+               }
+               
+               Task::where('id', $task['id'])->first()->update([
                     'board_id' => $task['board_id'],
                     'order' => $task['order'], 
-                ]);
+               ]);
             }
         }
+
+        return $this->success('Data updated successfully!');
+
     }
 
     public function update(Request $request, $id){

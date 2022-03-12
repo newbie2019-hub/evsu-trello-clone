@@ -56,3 +56,7 @@ Users
 NOTES
 Should be similar to Trello features
 Gantt Chart
+
+PROJECT NOTE
+--- TO-DO
+only the user that created the project can update the project

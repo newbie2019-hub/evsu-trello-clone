@@ -10,7 +10,7 @@
      </v-breadcrumbs>
      <h1 class="mt-4">{{ selected_project.name }}</h1>
      <p class="text-caption">
-      This project was created by {{ getOwner() ? 'You' : getOwner() }} on {{ this.selected_project.created_at }}
+      This project was created by {{getOwner()}} on {{ this.selected_project.created_at }}
      </p>
      <v-slide-group multiple show-arrows class="mt-5">
       <v-slide-item v-for="(member, i) in selected_project.members" :key="i" v-slot="{}">
@@ -22,18 +22,35 @@
           >
          </v-btn>
         </template>
-        <span><small>Member - {{ member.info.first_name[0] }}. {{ member.info.last_name }}</small></span>
+        <span
+         ><small>Member - {{ member.info.first_name[0] }}. {{ member.info.last_name }}</small></span
+        >
        </v-tooltip>
       </v-slide-item>
       <v-tooltip bottom>
        <template v-slot:activator="{ on, attrs }">
         <v-btn v-on="on" v-bind="attrs" small fab elevation="0" class="ml-1">
-         <v-avatar size="40" color="green darken-1"><span class="white--text">{{ selected_project.owner.info.first_name[0] }}{{ selected_project.owner.info.last_name[0] }}</span></v-avatar>
+         <v-avatar size="40" color="green darken-1"
+          ><span class="white--text"
+           >{{ selected_project.owner.info.first_name[0] }}{{ selected_project.owner.info.last_name[0] }}</span
+          ></v-avatar
+         >
         </v-btn>
        </template>
-       <span class=""><small>Owner - {{ selected_project.owner.info.first_name[0] }}. {{ selected_project.owner.info.last_name }}</small></span>
+       <span class=""
+        ><small
+         >Owner - {{ selected_project.owner.info.first_name[0] }}. {{ selected_project.owner.info.last_name }}</small
+        ></span
+       >
       </v-tooltip>
-      <v-btn @click.stop="addMemberDialog" small fab elevation="0" class="dashed-border ml-1">
+      <v-btn
+       v-if="selected_project.owner.id == user.id"
+       @click.stop="addMemberDialog"
+       small
+       fab
+       elevation="0"
+       class="dashed-border ml-1"
+      >
        <v-icon> mdi-plus </v-icon>
       </v-btn>
      </v-slide-group>
@@ -60,31 +77,56 @@
        v-for="(board, i) in selected_project.boards"
        :key="i"
       >
-       <p
+       <!-- <p
         @click="showEditField(board)"
         v-show="editBoardName != board.id"
         class="font-poppins rounded-tr-lg rounded-tl-lg pl-4 pt-3 pb-3 text-capitalize font-weight-bold sticky"
-        :class="board.color"
-       >
+        :class="board.color">
         {{ board.name }}
-       </p>
-       <v-layout v-if="editBoardName == board.id" class="" d-block>
-        <v-text-field
-         @blur="updateBoardName"
-         v-model="boardData.name"
-         autofocus
-         outlined
-         filled
-         hide-details="auto"
-         dense
-         :class="board.color"
-         dark
-         class="font-poppins rounded-tr-lg rounded-tl-lg pl-4 pt-3 pr-4 pb-3 text-capitalize font-weight-bold sticky cursor-pointer"
-        >
-        </v-text-field>
-       </v-layout>
+       </p> -->
+       <v-card-title  :class="board.color">
+        <span @click="showEditField(board)" v-show="editBoardName != board.id" class="text-h6">{{ board.name }}</span>
+        <v-layout v-if="editBoardName == board.id" class="" d-block>
+         <v-text-field
+          @blur="updateBoardName"
+          v-model="boardData.name"
+          autofocus
+          outlined
+          filled
+          hide-details="auto"
+          dense
+          :class="board.color"
+          dark
+          class="font-poppins text-capitalize font-weight-bold cursor-pointer"
+         >
+         </v-text-field>
+        </v-layout>
+        <v-spacer></v-spacer>
+        <v-menu bottom left>
+         <template v-slot:activator="{ on, attrs }">
+          <v-btn dark icon v-bind="attrs" v-on="on">
+           <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+         </template>
+         <v-list class="pa-0 ma-0">
+          <v-list-item class="pa-0 ma-0">
+           <v-btn text block color="green darken-1">Update</v-btn>
+          </v-list-item>
+          <v-list-item>
+           <v-btn text block color="red darken-1">Delete</v-btn>
+          </v-list-item>
+         </v-list>
+        </v-menu>
+       </v-card-title>
+
        <div class="task-container">
-        <draggable v-model="board.task" :options="{ animation: 200 }" @change="updateTaskOrder" group="tasks">
+        <draggable
+         v-model="board.task"
+         :options="{ animation: 200 }"
+         @move="noteMovedTask"
+         @change="updateTaskOrder"
+         group="tasks"
+        >
          <v-card
           v-for="(task, t) in board.task"
           @click.prevent="setSelectedTask(task, t, i, board.name)"
@@ -378,6 +420,7 @@
   </v-dialog>
 
   <add-project-member :projectId="selected_project.id" />
+  <project-log-drawer />
  </div>
 </template>
 <script>
@@ -385,7 +428,7 @@
  import { mapState } from 'vuex';
  import TaskComments from './components/TaskComments.vue';
  import AddProjectMember from './components/AddProjectMember.vue';
-
+ import ProjectLogDrawer from './components/ProjectLogDrawer.vue'
  export default {
   data: () => ({
    items: [
@@ -474,12 +517,14 @@
    activePicker: null,
    activePickerStart: null,
   }),
-  mounted() {
+  async mounted() {
+   this.isLoading = true
    if (this.selected_project.length == 0) {
-    this.$router.push({ name: 'Projects' });
+     this.$router.push({ name: 'Projects' });
    }
-   console.log(this.$route);
    this.items.push({ text: this.currentRouteName, href: '', disabled: true });
+   await this.getProjectLogs()
+   this.isLoading = false
   },
   computed: {
    currentRouteName() {
@@ -519,8 +564,14 @@
    ...mapState('project', ['selected_project']),
    ...mapState('auth', ['user']),
   },
-  components: { draggable, TaskComments, AddProjectMember },
+  components: { draggable, TaskComments, AddProjectMember, ProjectLogDrawer },
   methods: {
+   noteMovedTask(evt) {
+    console.log(evt);
+   },
+   async getProjectLogs(){
+    await this.$store.dispatch('logs/getProjectActivity', this.selected_project.id)
+   },
    addMemberDialog() {
     this.$store.commit('project/SET_MEMBER_DIALOG', true);
    },
@@ -531,9 +582,9 @@
     this.$refs.startdate.save(date);
    },
    getOwner() {
-    return this.user.id == this.selected_project.id
-     ? true
-     : this.selected_project.owner.info.first_name + this.selected_project.owner.info.last_name;
+    return this.user.id == this.selected_project.user_id
+     ? 'You'
+     : this.selected_project.owner.info.first_name + ' ' + this.selected_project.owner.info.last_name;
    },
    getTaskOwner() {
     return this.user.id == this.taskInfo.user_id
@@ -589,6 +640,7 @@
 
      this.boardData.name = '';
      this.editBoardName = '';
+     await this.getProjectLogs()
     }
    },
    async saveBoard() {
@@ -610,6 +662,8 @@
      }
 
      this.showAddBoard = false;
+     await this.getProjectLogs()
+
     }
    },
    async updateBoardOrder() {
@@ -619,15 +673,23 @@
 
     await this.$store.dispatch('project/updateBoardOrder', this.selected_project);
    },
-   async updateTaskOrder() {
+   async updateTaskOrder(data) {
+    console.log(data.added);
     this.selected_project.boards.map((board, i) => {
      board.task.map((task, i) => {
+      if (data.added && data.added.element.id == task.id) {
+       task.moved = true;
+      } else {
+       task.moved = false;
+      }
+
       task.order = i + 1;
       task.board_id = board.id;
      });
     });
 
     await this.$store.dispatch('project/updateTaskOrder', this.selected_project);
+    await this.getProjectLogs()
    },
    async assignTask() {
     this.isLoading = true;
@@ -682,6 +744,8 @@
      }
      this.showAddIndex = null;
      this.data.name = '';
+     await this.getProjectLogs()
+
     }
    },
    async saveComment() {
@@ -692,6 +756,8 @@
      this.showToast(data, 'error');
     }
     this.taskData.comment = '';
+     await this.getProjectLogs()
+
    },
   },
   watch: {

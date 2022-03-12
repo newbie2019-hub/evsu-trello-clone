@@ -21,6 +21,10 @@ class Task extends Model
         return $date->format('Y-m-d h:i A');
     }
 
+    public function project(){
+        return $this->belongsTo(Project::class, 'project_id', 'id');
+    }
+    
     public function user(){
         return $this->belongsTo(User::class, 'user_id', 'id');
     }

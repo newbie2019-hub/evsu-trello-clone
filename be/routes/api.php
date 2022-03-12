@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProjectBoardController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectLogController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\ProjectTaskController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\UserLogController;
+use App\Models\ProjectLog;
 use App\Models\ProjectMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -43,6 +46,8 @@ Route::middleware('api')->group(function () {
         Route::post('remove-profile', 'deleteProfileImg');
     });
     
+    Route::get('dashboard', [DashboardController::class, 'index']);
+
     Route::apiResource('project-member', ProjectMemberController::class);
     Route::apiResource('project', ProjectController::class);
     
@@ -58,4 +63,7 @@ Route::middleware('api')->group(function () {
     Route::apiResource('task-comment', TaskCommentController::class);
     
     Route::get('account-logs', [UserLogController::class, 'index']);
+
+    Route::post('project-activity/{id}', [ProjectLogController::class, 'getProjectActivity']);
+    Route::get('project-logs', [ProjectLogController::class, 'index']);
 });

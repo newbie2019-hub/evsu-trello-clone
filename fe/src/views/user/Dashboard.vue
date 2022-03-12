@@ -12,8 +12,10 @@
          <v-card-text>
           <v-row align="center" justify="center">
            <v-col cols="6">
-            <p class="white--text text-h2 font-weight-bold font-poppins">15</p>
-            <p class="white--text text-h6 ml-3 font-weight-bold font-poppins">Projects</p>
+            <p class="white--text text-h2 font-weight-bold font-poppins">
+             <span v-if="summary.projects < 10" class="">0</span>{{ summary.projects }}
+            </p>
+            <p class="white--text text-h6 font-weight-bold font-poppins">Projects</p>
            </v-col>
            <v-icon class="mt-n5" color="white" size="7rem" right> mdi-package-variant </v-icon>
           </v-row>
@@ -25,8 +27,10 @@
          <v-card-text>
           <v-row align="center" justify="center">
            <v-col cols="6">
-            <p class="white--text text-h2 font-weight-bold font-poppins">18</p>
-            <p class="white--text text-h6 ml-3 font-weight-bold font-poppins">Tasks</p>
+            <p class="white--text text-h2 font-weight-bold font-poppins">
+             <span v-if="summary.tasks.length < 10" class="">0</span>{{ summary.tasks.length }}
+            </p>
+            <p class="white--text text-h6 font-weight-bold font-poppins">Tasks</p>
            </v-col>
            <v-icon class="mt-n5" color="white" size="7rem" right> mdi-clock-check-outline </v-icon>
           </v-row>
@@ -38,7 +42,9 @@
          <v-card-text>
           <v-row align="center" justify="center">
            <v-col cols="6">
-            <p class="white--text text-h2 font-weight-bold font-poppins">0</p>
+            <p class="white--text text-h2 font-weight-bold font-poppins">
+             <span v-if="summary.issues < 10" class="">0</span>{{ summary.issues }}
+            </p>
             <p class="white--text text-h6 font-weight-bold font-poppins">Issues</p>
            </v-col>
            <v-icon class="mt-n5" color="white" size="7rem" right> mdi-fire </v-icon>
@@ -65,7 +71,7 @@
      <v-col cols="12" sm="12" md="11" lg="7">
       <h1>Assigned Task</h1>
       <p class="text-caption">Shown below are the latest task assigned to you.</p>
-      <v-data-table :headers="headers" :items="desserts" :items-per-page="5" class="mt-4"></v-data-table>
+      <v-data-table :headers="taskHeaders" :items="summary.tasks" :items-per-page="5" class="mt-4"></v-data-table>
      </v-col>
     </v-row>
 
@@ -74,7 +80,11 @@
      <v-col cols="12" sm="12" md="11" lg="11" xl="8">
       <h1>Project Activities</h1>
       <p class="text-caption">Shown below are the logs of the project.</p>
-      <v-data-table :headers="headers" :items="desserts" :items-per-page="5" class="mt-4"></v-data-table>
+      <v-data-table :headers="headers" :items="summary.activity" :items-per-page="10" class="mt-4">
+       <template v-slot:item.user="{ item }">
+        {{item.user.info.first_name}} {{item.user.info.last_name}}
+       </template>
+      </v-data-table>
      </v-col>
     </v-row>
    </v-layout>
@@ -82,6 +92,7 @@
  </div>
 </template>
 <script>
+ import { mapState } from 'vuex';
  export default {
   data: () => ({
    projects: [
@@ -90,70 +101,71 @@
      value: 'Trello',
     },
    ],
+   taskHeaders: [
+    {
+     text: 'Task',
+     align: 'start',
+     sortable: true,
+     value: 'task',
+    },
+    {
+     text: 'Type',
+     align: 'start',
+     sortable: true,
+     value: 'type',
+    },
+    {
+     text: 'Status',
+     align: 'start',
+     sortable: true,
+     value: 'status',
+    },
+    {
+     text: 'On Project',
+     align: 'start',
+     sortable: true,
+     value: 'project.name',
+    },
+    {
+     text: 'Start Date',
+     align: 'start',
+     sortable: true,
+     value: 'start_date',
+    },
+    {
+     text: 'Delivery Date',
+     align: 'start',
+     sortable: true,
+     value: 'delivery_date',
+    },
+    {
+     text: 'Created On',
+     align: 'start',
+     sortable: true,
+     value: 'created_at',
+    },
+   ],
    headers: [
     {
-     text: 'Dessert (100g serving)',
+     text: 'Activity Name',
      align: 'start',
      sortable: false,
      value: 'name',
     },
-    { text: 'Calories', value: 'calories' },
-    { text: 'Fat (g)', value: 'fat' },
-    { text: 'Carbs (g)', value: 'carbs' },
-    { text: 'Protein (g)', value: 'protein' },
-    { text: 'Iron (%)', value: 'iron' },
+    { text: 'Event', value: 'event' },
+    { text: 'Description', value: 'description' },
+    { text: 'User', value: 'user' },
+    { text: 'On Project', value: 'project.name' },
    ],
-   desserts: [
-    {
-     name: 'Frozen Yogurt',
-     calories: 159,
-     fat: 6.0,
-     carbs: 24,
-     protein: 4.0,
-     iron: '1%',
-    },
-    {
-     name: 'Ice cream sandwich',
-     calories: 237,
-     fat: 9.0,
-     carbs: 37,
-     protein: 4.3,
-     iron: '1%',
-    },
-    {
-     name: 'Eclair',
-     calories: 262,
-     fat: 16.0,
-     carbs: 23,
-     protein: 6.0,
-     iron: '7%',
-    },
-    {
-     name: 'Cupcake',
-     calories: 305,
-     fat: 3.7,
-     carbs: 67,
-     protein: 4.3,
-     iron: '8%',
-    },
-    {
-     name: 'Gingerbread',
-     calories: 356,
-     fat: 16.0,
-     carbs: 49,
-     protein: 3.9,
-     iron: '16%',
-    },
-    {
-     name: 'Jelly bean',
-     calories: 375,
-     fat: 0.0,
-     carbs: 94,
-     protein: 0.0,
-     iron: '0%',
-    },
-   ],
+   
   }),
+  async mounted() {
+   document.title = 'Dashboard - Welcome ';
+   await this.$store.dispatch('dashboard/summary');
+  },
+  computed: {
+   ...mapState('dashboard', ['summary']),
+  },
  };
 </script>
 <style>

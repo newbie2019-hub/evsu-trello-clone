@@ -52,6 +52,7 @@
      this.showToast(data.msg);
     }
     this.isLoading = false
+    this.$store.commit('project/SET_MEMBER_DIALOG', false)
 
    },
    showToast(msg, alertType = 'success', isVisible = true) {

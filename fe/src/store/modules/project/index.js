@@ -81,12 +81,21 @@ export default {
      * 
      */
      STORE_COMMENT(state, {resData: data, payload: payload}){
-        state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].comments.push(data)
+        state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].comments.unshift(data)
      },
 
      ADD_PROJECT_MEMBER(state, {data: data, payload: payload}){
-       data.forEach((user, i) => {
-         state.selected_project.members.push(user.user)
+       if(state.selected_project.length > 0){
+         data.forEach((user, i) => {
+           state.selected_project.members.push(user.user)
+         })
+       }
+       state.projects.map((project) => {
+         if(project.id == payload.project_id){
+          data.forEach((user, i) => {
+            project.members.push(user.user)
+          })
+         }
        })
      }
   },

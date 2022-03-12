@@ -7,9 +7,13 @@
      <v-btn
       @click.prevent="
        createProjectDialog = true;
-       formType = 'create';" color="primary"
+       formType = 'create';
+      "
+      color="primary"
       elevation="0"
-      x-small fab>
+      x-small
+      fab
+     >
       <v-icon>mdi-plus</v-icon>
      </v-btn>
     </h1>
@@ -32,18 +36,40 @@
        </v-col>
       </v-row>
       <v-data-table :headers="headers" :items="projects" :search="search" :items-per-page="10" class="mt-4">
-       <template v-slot:item.members="{ }">
-        <v-btn x-small fab elevation="0" class="dashed-border">
-         <v-icon>
-          mdi-plus
-         </v-icon>
-        </v-btn>
+       <template v-slot:item.members="{ item }">
+        <v-layout d-flex>
+         <v-tooltip bottom v-for="(member, i) in item.members" :key="i">
+          <template v-slot:activator="{ on, attrs }">
+           <v-btn v-bind="attrs" v-on="on" x-small fab elevation="0" class="ml-n5">
+            <v-avatar size="32" :color="randomColor(i)"><span class="white--text">{{ member.info.first_name[0] }}{{ member.info.last_name[0] }}</span></v-avatar>
+           </v-btn>
+          </template>
+          <span><small>{{ member.info.first_name[0] }}. {{ member.info.last_name }}</small></span>
+         </v-tooltip>
+         <v-btn color="primary" v-if="item.owner.id == user.id" @click.stop="addMemberDialog(item.id)" x-small fab elevation="0" class="dashed-border ml-n5">
+          <v-icon> mdi-plus </v-icon>
+         </v-btn>
+        </v-layout>
        </template>
        <template v-slot:item.actions="{ item }">
         <v-layout>
          <v-btn @click="viewProject(item)" small text color="green darken-1">View</v-btn>
-         <v-btn  @click="data = { ...item }; formType = 'update'; createProjectDialog = true;" small text color="primary darken-1">Update</v-btn>
-         <v-btn @click="dialogDelete = true; delete_data = item.id;" small text color="red darken-1">Delete</v-btn>
+         <v-btn
+          v-if="item.user_id == user.id"
+          @click="
+           data = { ...item };
+           formType = 'update';
+           createProjectDialog = true;"
+          small
+          text
+          color="primary darken-1">Update</v-btn>
+         <v-btn
+          v-if="item.user_id == user.id"
+          @click="
+           dialogDelete = true;
+           delete_data = item.id;" small
+          text
+          color="red darken-1">Delete</v-btn>
         </v-layout>
        </template>
       </v-data-table>
@@ -166,17 +192,22 @@
     </v-card-actions>
    </v-card>
   </v-dialog>
+
+  <add-project-member :projectId="projectId" />
  </div>
 </template>
 <script>
  import { mapState } from 'vuex';
+import AddProjectMember from './components/AddProjectMember.vue';
 
  export default {
+  components: { AddProjectMember },
   data: () => ({
    search: '',
    deliveryMenu: false,
    startMenu: false,
    dialogDelete: false,
+   projectId: null,
    delete_data: {
     id: '',
    },
@@ -217,8 +248,31 @@
   },
   computed: {
    ...mapState('project', ['projects']),
+   ...mapState('auth', ['user']),
   },
   methods: {
+   randomColor(i) {
+    switch (i) {
+     case 0:
+      return 'orange darken-2';
+     case 1:
+      return 'teal lighten-2';
+     case 2:
+      return 'green darken-1';
+     case 3:
+      return 'red darken-1';
+     case 4:
+      return 'yellow darken-2';
+     case 5:
+      return 'blue darken-2';
+     default:
+      return 'primary';
+    }
+   },
+   addMemberDialog(id) {
+    this.projectId = id
+    this.$store.commit('project/SET_MEMBER_DIALOG', true);
+   },
    save(date) {
     this.$refs.deliverydate.save(date);
    },
@@ -240,8 +294,8 @@
     this.isLoading = false;
    },
    async viewProject(data) {
-    this.$router.push({name: 'Project', params: {slug: data.slug, name: data.name}})
-    this.$store.commit('project/SET_SELECTED', data)
+    this.$router.push({ name: 'Project', params: { slug: data.slug, name: data.name } });
+    this.$store.commit('project/SET_SELECTED', data);
    },
    async createProject() {
     const validated = this.$refs.formCreate.validate();

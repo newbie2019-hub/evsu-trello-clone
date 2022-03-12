@@ -3,7 +3,11 @@
   <v-container>
    <v-col cols="12" sm="12" md="11" lg="11" xl="8">
     <v-row justify="end">
-     <v-menu id="" class="notif-card" rounded="xl" bottom left :offset-y="true" :close-on-click="true" >
+     <v-btn @click.prevent="setLogDrawerState" text v-if="$route.name == 'Project'">
+      <v-icon size="25" color="blue lighten-1">mdi-history</v-icon>
+      &nbsp;Activities
+     </v-btn>
+     <v-menu id="" class="notif-card" rounded="xl" bottom left :offset-y="true" :close-on-click="true">
       <template v-slot:activator="{ on, attrs }">
        <v-btn dark icon v-bind="attrs" v-on="on">
         <v-icon size="25" color="blue lighten-1">mdi-bell</v-icon>
@@ -35,8 +39,15 @@
   data: () => ({
    items: [
     { description: 'John Doe added you as a member in a Project.' },
-    { description: 'John Doe added you as a member in a Project.' }
+    { description: 'John Doe added you as a member in a Project.' },
    ],
   }),
+  methods: {
+   setLogDrawerState() {
+    console.log('Clicked');
+    this.$store.commit('logs/SET_LOG_STATE', true);
+   },
+  },
+
  };
 </script>
