@@ -6,6 +6,8 @@ export default {
     projects: [],
     selected_project: [],
     addMemberDialog: false,
+    ganttChartState: false,
+    chartData: [],
   },
   getters: {
     GET_SELECTED_PROJECT_MEMBERS(state){
@@ -21,6 +23,12 @@ export default {
     },
     SET_PROJECTS(state, payload) {
       state.projects = payload
+    },
+    SET_CHART_STATE(state, payload) {
+      state.ganttChartState = payload
+    },
+    SET_PROJECT_TASKS(state, payload) {
+      state.chartData = payload
     },
     UPDATE_PROJECT(state, payload) {
       state.projects.forEach((project, i) => {
@@ -143,6 +151,16 @@ export default {
     /**
      *  Task Section
      */
+    async getTasks({ commit }, payload) {
+      const res = await API.get(`task/${payload}`).then(res => {
+        commit('SET_PROJECT_TASKS', res.data.data)
+        return res;
+      }).catch(error => {
+        return error.response;
+      })
+
+      return res;
+    },
     async storeTask({ commit }, payload) {
       const res = await API.post('task', payload).then(res => {
         commit('UPDATE_BOARD_TASK', res.data.data)

@@ -64,6 +64,10 @@ class User extends Authenticatable implements JWTSubject
         return $date->format('Y-m-d h:i A');
     }
 
+    public function tasks(){
+        return $this->hasMany(Task::class, 'user_id', 'id');
+    }
+
     public function info(){
         return $this->belongsTo(UserInfo::class, 'user_info_id', 'id');
     }

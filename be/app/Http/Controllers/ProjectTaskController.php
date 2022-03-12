@@ -7,6 +7,7 @@ use App\Models\Board;
 use App\Models\ProjectLog;
 use App\Models\Task;
 use App\Models\TaskAssignee;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ProjectTaskController extends Controller
@@ -20,6 +21,12 @@ class ProjectTaskController extends Controller
     //     $project = Task::with(['owner', 'owner.info', 'members', 'members.info', 'boards'])->get();
     //     return response()->json($project);
     // }
+
+    public function getProjectTasks($id){
+        $tasks = Task::where('project_id', $id)->with(['user.info','project'])->get();
+        // $tasks = User::whereRelation('tasks', 'project_id', $id)->with(['tasks', 'tasks.project', 'info'])->get();
+        return $this->success('Data retrieved successfully!', $tasks);
+    }
 
     public function store(TaskRequest $request){
         $task = Task::create($request->safe()->only(['task', 'project_id', 'board_id']) + [

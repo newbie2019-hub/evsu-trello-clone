@@ -58,6 +58,7 @@ Route::middleware('api')->group(function () {
     Route::delete('task/assignee/{id}', [ProjectTaskController::class, 'removeTaskAssignee']);
     Route::post('task/assignee', [ProjectTaskController::class, 'updateTaskAssignee']);
     Route::post('task/update-order', [ProjectTaskController::class, 'updateOrder']);
+    Route::get('task/{id}', [ProjectTaskController::class, 'getProjectTasks']);
     Route::apiResource('task', ProjectTaskController::class);
     
     Route::apiResource('task-comment', TaskCommentController::class);

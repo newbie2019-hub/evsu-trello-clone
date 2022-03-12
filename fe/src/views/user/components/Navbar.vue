@@ -3,6 +3,10 @@
   <v-container>
    <v-col cols="12" sm="12" md="11" lg="11" xl="8">
     <v-row justify="end">
+     <v-btn @click.prevent="setChartState" text v-if="$route.name == 'Project'">
+      <v-icon size="25" color="blue lighten-1">mdi-chart-timeline-variant</v-icon>
+      &nbsp;Chart
+     </v-btn>
      <v-btn @click.prevent="setLogDrawerState" text v-if="$route.name == 'Project'">
       <v-icon size="25" color="blue lighten-1">mdi-history</v-icon>
       &nbsp;Activities
@@ -46,6 +50,10 @@
    setLogDrawerState() {
     console.log('Clicked');
     this.$store.commit('logs/SET_LOG_STATE', true);
+   },
+   setChartState() {
+    console.log('hi')
+    this.$store.commit('project/SET_CHART_STATE', true);
    },
   },
 

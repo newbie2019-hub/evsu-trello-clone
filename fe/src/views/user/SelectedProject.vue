@@ -421,6 +421,7 @@
 
   <add-project-member :projectId="selected_project.id" />
   <project-log-drawer />
+  <gantt-chart />
  </div>
 </template>
 <script>
@@ -429,6 +430,8 @@
  import TaskComments from './components/TaskComments.vue';
  import AddProjectMember from './components/AddProjectMember.vue';
  import ProjectLogDrawer from './components/ProjectLogDrawer.vue'
+ import GanttChart from './components/GanttChart.vue'
+
  export default {
   data: () => ({
    items: [
@@ -524,6 +527,7 @@
    }
    this.items.push({ text: this.currentRouteName, href: '', disabled: true });
    await this.getProjectLogs()
+   await this.getChartData()
    this.isLoading = false
   },
   computed: {
@@ -564,10 +568,13 @@
    ...mapState('project', ['selected_project']),
    ...mapState('auth', ['user']),
   },
-  components: { draggable, TaskComments, AddProjectMember, ProjectLogDrawer },
+  components: { draggable, TaskComments, AddProjectMember, ProjectLogDrawer, GanttChart },
   methods: {
    noteMovedTask(evt) {
     console.log(evt);
+   },
+   async getChartData(){
+    await this.$store.dispatch('project/getTasks', this.selected_project.id)
    },
    async getProjectLogs(){
     await this.$store.dispatch('logs/getProjectActivity', this.selected_project.id)
