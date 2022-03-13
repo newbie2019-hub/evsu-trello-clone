@@ -172,7 +172,7 @@
      <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey darken-2" text @click="createProjectDialog = false"> Cancel </v-btn>
-      <v-btn :loading="isLoading" color="green darken-1" text type="submit"> Create </v-btn>
+      <v-btn :loading="isLoading" color="green darken-1" text type="submit"> {{formType == 'create' ? 'Create' : 'Update'}} </v-btn>
      </v-card-actions>
     </v-form>
    </v-card>

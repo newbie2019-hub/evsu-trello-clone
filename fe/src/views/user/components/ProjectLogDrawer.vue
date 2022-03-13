@@ -60,7 +60,9 @@
     },
    },
   }),
-  async mounted() {},
+  mounted() {
+   this.isOpened = false
+  },
   methods: {},
   computed: {
    ...mapState('logs', ['logState', 'projectActivity']),

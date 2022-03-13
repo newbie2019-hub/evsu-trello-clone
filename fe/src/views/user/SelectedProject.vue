@@ -9,9 +9,7 @@
       </template>
      </v-breadcrumbs>
      <h1 class="mt-4">{{ selected_project.name }}</h1>
-     <p class="text-caption">
-      This project was created by {{getOwner()}} on {{ this.selected_project.created_at }}
-     </p>
+     <p class="text-caption">This project was created by {{ getOwner() }} on {{ this.selected_project.created_at }}</p>
      <v-slide-group multiple show-arrows class="mt-5">
       <v-slide-item v-for="(member, i) in selected_project.members" :key="i" v-slot="{}">
        <v-tooltip bottom>
@@ -84,7 +82,7 @@
         :class="board.color">
         {{ board.name }}
        </p> -->
-       <v-card-title  :class="board.color">
+       <v-card-title :class="board.color">
         <span @click="showEditField(board)" v-show="editBoardName != board.id" class="text-h6">{{ board.name }}</span>
         <v-layout v-if="editBoardName == board.id" class="" d-block>
          <v-text-field
@@ -102,7 +100,7 @@
          </v-text-field>
         </v-layout>
         <v-spacer></v-spacer>
-        <v-menu bottom left>
+        <v-menu bottom left v-if="selected_project.user_id == user.id">
          <template v-slot:activator="{ on, attrs }">
           <v-btn dark icon v-bind="attrs" v-on="on">
            <v-icon>mdi-dots-vertical</v-icon>
@@ -110,31 +108,48 @@
          </template>
          <v-list class="pa-0 ma-0">
           <v-list-item class="pa-0 ma-0">
-           <v-btn text block color="green darken-1">Update</v-btn>
+           <v-btn
+            @click.stop="
+             updateBoardDialog = true;
+             boardUpdateData = JSON.parse(JSON.stringify(board));
+            "
+            text
+            block
+            color="green darken-1"
+            >Update</v-btn
+           >
           </v-list-item>
-          <v-list-item>
-           <v-btn text block color="red darken-1">Delete</v-btn>
+          <v-list-item class="pa-0 ma-0">
+           <v-btn
+            @click.stop="
+             deleteDialog = true;
+             boardId = board.id;
+            "
+            text
+            block
+            color="red darken-1"
+            >Delete</v-btn
+           >
           </v-list-item>
          </v-list>
         </v-menu>
        </v-card-title>
 
        <div class="task-container">
-        <draggable
-         v-model="board.task"
-         :options="{ animation: 200 }"
-         @move="noteMovedTask"
-         @change="updateTaskOrder"
-         group="tasks"
-        >
+        <draggable v-model="board.task" :options="{ animation: 200 }" @change="updateTaskOrder" group="tasks">
          <v-card
           v-for="(task, t) in board.task"
           @click.prevent="setSelectedTask(task, t, i, board.name)"
           :key="t"
           class="mt-2 pt-2 pl-3 pr-2 pb-1 rounded-lg cursor-pointer task-card-hover"
           elevation="1"
-         >
-          <p>{{ task.task }}</p>
+          >
+          <p class="pr-3">{{ task.task }}</p>
+          <div class="task-icon-container">
+           <v-btn @click.stop="boardDeleteData.boardIndex = i; boardDeleteData.id = task.id; deleteTaskDialog = true;" icon x-small color="red">
+            <v-icon>mdi-close</v-icon>
+           </v-btn>
+          </div>
          </v-card>
         </draggable>
         <v-card v-if="showAddIndex == board.id" class="mt-2 pl-3 pr-2 pb-3 rounded-lg" elevation="1">
@@ -206,8 +221,7 @@
     </v-textarea>
     <v-card-text class="pl-14 mt-2">
      This task is created by
-     <span class="font-italic font-weight-bold">{{ getTaskOwner() ? 'You' : getTaskOwner() }}</span> on
-     {{ taskData.created_at }}<br />
+     <span class="font-italic font-weight-bold">{{ getTaskOwner() }}</span> on {{ taskData.created_at }}<br />
      <span class="font-italic font-weight-bold">{{ taskData.task }}</span> is on a board named
      <span class="font-italic font-weight-bold">{{ taskData.boardName }}</span>
     </v-card-text>
@@ -422,6 +436,79 @@
   <add-project-member :projectId="selected_project.id" />
   <project-log-drawer />
   <gantt-chart />
+
+  <v-dialog v-model="deleteDialog" max-width="350">
+   <v-card>
+    <v-card-title class="text-h5"> Confirm Delete </v-card-title>
+    <v-card-text>
+     Are you sure you want to delete this card? This will also delete the tasks on it.
+     <span class="red--text">Warning: You cannot undo this action.</span>
+    </v-card-text>
+    <v-card-actions>
+     <v-spacer></v-spacer>
+     <v-btn color="grey darken-1" text @click="deleteDialog = false" :loading="isLoading"> Cancel </v-btn>
+     <v-btn color="red darken-1" text @click="deleteBoard" :loading="isLoading"> Delete </v-btn>
+    </v-card-actions>
+   </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="deleteTaskDialog" max-width="360">
+   <v-card>
+    <v-card-title class="text-h5"> Confirm Delete </v-card-title>
+    <v-card-text>
+     Are you sure you want to delete this task? This will also delete any comments on it.
+     <span class="red--text">Warning: You cannot undo this action.</span>
+    </v-card-text>
+    <v-card-actions>
+     <v-spacer></v-spacer>
+     <v-btn color="grey darken-1" text @click="deleteTaskDialog = false" :loading="isLoading"> Cancel </v-btn>
+     <v-btn color="red darken-1" text @click="deleteTask" :loading="isLoading"> Delete </v-btn>
+    </v-card-actions>
+   </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="updateBoardDialog" max-width="420">
+   <v-card>
+    <v-form ref="boardUpdate" @submit.prevent="updateBoard" lazy-validation>
+     <v-card-title class="text-h5"> Update Board </v-card-title>
+     <v-card-text>
+      Please fill-in the fields to update the board data.
+      <v-text-field
+       type="text"
+       append-icon="mdi-card-text-outline"
+       class="mt-3"
+       hide-details="auto"
+       v-model="boardUpdateData.name"
+       :rules="required"
+       label="Board Name"
+       required
+       outlined
+       dense
+      ></v-text-field>
+      <v-textarea
+       type="text"
+       append-icon="mdi-information-outline"
+       class="mt-3"
+       hide-details="auto"
+       v-model="boardUpdateData.description"
+       :rules="required"
+       label="Description"
+       required
+       auto-grow
+       counter
+       outlined
+       dense
+      ></v-textarea>
+      <v-select v-model="boardUpdateData.color" :items="colorSelection" label="Board Color" outlined dense></v-select>
+     </v-card-text>
+     <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="grey darken-1" text @click="updateBoardDialog = false" :loading="isLoading"> Cancel </v-btn>
+      <v-btn color="green darken-1" type="submit" text :loading="isLoading"> Update </v-btn>
+     </v-card-actions>
+    </v-form>
+   </v-card>
+  </v-dialog>
  </div>
 </template>
 <script>
@@ -429,8 +516,8 @@
  import { mapState } from 'vuex';
  import TaskComments from './components/TaskComments.vue';
  import AddProjectMember from './components/AddProjectMember.vue';
- import ProjectLogDrawer from './components/ProjectLogDrawer.vue'
- import GanttChart from './components/GanttChart.vue'
+ import ProjectLogDrawer from './components/ProjectLogDrawer.vue';
+ import GanttChart from './components/GanttChart.vue';
 
  export default {
   data: () => ({
@@ -449,10 +536,48 @@
    dialogAssignee: false,
    boardIndex: null,
    editBoardName: null,
+   boardUpdateData: [],
+   boardDeleteData: {
+     id: null
+   },
    showAddBoard: false,
    taskDialog: false,
    isLoading: false,
+   deleteDialog: false,
+   updateBoardDialog: false,
+   deleteTaskDialog: false,
+   boardId: null,
    required: [(v) => !!v || 'Field is required'],
+   colorSelection: [
+    {
+     text: 'green',
+     value: 'green lighten-1 white--text',
+    },
+    {
+     text: 'red',
+     value: 'red lighten-1 white--text',
+    },
+    {
+     text: 'primary',
+     value: 'primary lighten-1 white--text',
+    },
+    {
+     text: 'grey',
+     value: 'grey darken-2 white--text',
+    },
+    {
+     text: 'orange',
+     value: 'orange darken-1 white--text',
+    },
+    {
+     text: 'indigo',
+     value: 'indigo darken-1 white--text',
+    },
+    {
+     text: 'pink',
+     value: 'pink lighten-1 white--text',
+    },
+   ],
    taskTypeItem: [
     {
      text: 'Enhancement',
@@ -521,14 +646,14 @@
    activePickerStart: null,
   }),
   async mounted() {
-   this.isLoading = true
+   this.isLoading = true;
    if (this.selected_project.length == 0) {
-     this.$router.push({ name: 'Projects' });
+    this.$router.push({ name: 'Projects' });
    }
    this.items.push({ text: this.currentRouteName, href: '', disabled: true });
-   await this.getProjectLogs()
-   await this.getChartData()
-   this.isLoading = false
+   await this.getProjectLogs();
+   await this.getChartData();
+   this.isLoading = false;
   },
   computed: {
    currentRouteName() {
@@ -570,14 +695,11 @@
   },
   components: { draggable, TaskComments, AddProjectMember, ProjectLogDrawer, GanttChart },
   methods: {
-   noteMovedTask(evt) {
-    console.log(evt);
+   async getChartData() {
+    await this.$store.dispatch('project/getTasks', this.selected_project.id);
    },
-   async getChartData(){
-    await this.$store.dispatch('project/getTasks', this.selected_project.id)
-   },
-   async getProjectLogs(){
-    await this.$store.dispatch('logs/getProjectActivity', this.selected_project.id)
+   async getProjectLogs() {
+    await this.$store.dispatch('logs/getProjectActivity', this.selected_project.id);
    },
    addMemberDialog() {
     this.$store.commit('project/SET_MEMBER_DIALOG', true);
@@ -595,8 +717,8 @@
    },
    getTaskOwner() {
     return this.user.id == this.taskInfo.user_id
-     ? true
-     : this.taskInfo.user.info.first_name + this.taskInfo.user.info.last_name;
+     ? 'You'
+     : this.taskInfo.user.info.first_name + ' ' + this.taskInfo.user.info.last_name;
    },
    setSelectedTask(data, taskIndex, boardIndex, boardName) {
     this.taskDialog = true;
@@ -647,8 +769,42 @@
 
      this.boardData.name = '';
      this.editBoardName = '';
-     await this.getProjectLogs()
+     await this.getProjectLogs();
     }
+   },
+   async deleteBoard() {
+    if (this.boardId == null) return;
+    this.isLoading = true;
+    const boardData = {
+     id: this.boardId,
+    };
+    const { status, data } = await this.$store.dispatch('project/deleteBoard', boardData);
+    if (status != 200) {
+     this.showToast(data, 'error');
+     // this.showToast(data.msg);
+    }
+
+    await this.getProjectLogs();
+    this.deleteDialog = false;
+    this.boardId = null;
+    this.isLoading = false;
+   },
+   async updateBoard() {
+    const validated = this.$refs.boardUpdate.validate();
+
+    if (validated) {
+     this.isLoading = true;
+     const { status, data } = await this.$store.dispatch('project/updateBoard', this.boardUpdateData);
+     if (status != 200) {
+      this.showToast(data, 'error');
+     }
+
+     await this.getProjectLogs();
+     this.updateBoardDialog = false;
+     this.$refs.boardUpdate.reset();
+    }
+
+    this.isLoading = false;
    },
    async saveBoard() {
     if (this.boardData.name.trim() == '') {
@@ -669,8 +825,7 @@
      }
 
      this.showAddBoard = false;
-     await this.getProjectLogs()
-
+     await this.getProjectLogs();
     }
    },
    async updateBoardOrder() {
@@ -696,7 +851,7 @@
     });
 
     await this.$store.dispatch('project/updateTaskOrder', this.selected_project);
-    await this.getProjectLogs()
+    await this.getProjectLogs();
    },
    async assignTask() {
     this.isLoading = true;
@@ -727,6 +882,16 @@
     this.isLoading = false;
     this.taskDialog = false;
    },
+   async deleteTask() {
+    this.isLoading = true;
+    const { status, data } = await this.$store.dispatch('project/deleteTask', this.boardDeleteData);
+    if (status != 200) {
+     this.showToast(data, 'error');
+    }
+    this.isLoading = false;
+    await this.getProjectLogs();
+    this.deleteTaskDialog = false;
+   },
    async saveCardTask() {
     if (this.data.name.trim() == '') {
      this.showAddIndex = null;
@@ -751,8 +916,7 @@
      }
      this.showAddIndex = null;
      this.data.name = '';
-     await this.getProjectLogs()
-
+     await this.getProjectLogs();
     }
    },
    async saveComment() {
@@ -763,8 +927,7 @@
      this.showToast(data, 'error');
     }
     this.taskData.comment = '';
-     await this.getProjectLogs()
-
+    await this.getProjectLogs();
    },
   },
   watch: {
@@ -774,3 +937,11 @@
   },
  };
 </script>
+<style>
+.task-icon-container
+{
+  position: absolute;
+  top: 7px;
+  right: 10px;
+}
+</style>

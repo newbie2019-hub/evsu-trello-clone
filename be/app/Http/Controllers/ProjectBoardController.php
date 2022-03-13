@@ -69,4 +69,33 @@ class ProjectBoardController extends Controller
 
         return $this->success('Board successfully updated!');
     }
+
+    public function update(Request $request, $id){
+        $board = Board::where('id', $id)->first();
+        $board->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'color' => $request->color,
+        ]);
+
+        return $this->success('Board data updated successfully!', $board);
+    }
+
+    public function destroy($id){
+        $board = Board::where('id', $id)->first();
+
+        ProjectLog::create([
+            'name' => 'Board Deleted',
+            'event' => 'delete',
+            'description' => auth()->user()->info->first_name . ' ' .auth()->user()->info->last_name . ' deleted a board named '. $board->name,
+            'subject_type' => Board::class,
+            'subject_id' => $board->id,
+            'project_id' => $board->project_id,
+            'user_id' => auth()->user()->id
+        ]);
+
+        Board::destroy($id);
+
+        return $this->success('Board deleted successfully!');
+    }
 }

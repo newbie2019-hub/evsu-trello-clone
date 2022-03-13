@@ -129,6 +129,17 @@ class ProjectTaskController extends Controller
     }
 
     public function destroy($id){
+        $task = Task::where('id', $id)->first();
+        $board = Board::where('id', $task->board_id)->first();
+        ProjectLog::create([
+            'name' => 'Task Deleted',
+            'event' => 'deleted',
+            'description' => auth()->user()->info->first_name . ' ' .auth()->user()->info->last_name . ' deleted a task named '. $task->task . ' from board ' . $board->name,
+            'subject_type' => Task::class,
+            'subject_id' => $task->id,
+            'project_id' => $task->project_id,
+            'user_id' => auth()->user()->id
+        ]);
         Task::destroy($id);
         return $this->success('Task has been removed!');
     }

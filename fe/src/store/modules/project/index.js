@@ -10,15 +10,15 @@ export default {
     chartData: [],
   },
   getters: {
-    GET_SELECTED_PROJECT_MEMBERS(state){
+    GET_SELECTED_PROJECT_MEMBERS(state) {
       return state.selected_project.members
     },
-    GET_MEMBER_DIALOG(state){
+    GET_MEMBER_DIALOG(state) {
       return state.addMemberDialog
     }
   },
   mutations: {
-    SET_MEMBER_DIALOG(state, payload){
+    SET_MEMBER_DIALOG(state, payload) {
       state.addMemberDialog = payload
     },
     SET_PROJECTS(state, payload) {
@@ -51,21 +51,30 @@ export default {
       state.selected_project = payload
     },
     UPDATE_TASK_DATA(state, payload) {
-     state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].task = payload.task
-     state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].description = payload.description
-     state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].type = payload.type
-     state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].status = payload.status
-     state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].start_date = payload.start_date
-     state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].delivery_date = payload.delivery_date
+      state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].task = payload.task
+      state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].description = payload.description
+      state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].type = payload.type
+      state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].status = payload.status
+      state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].start_date = payload.start_date
+      state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].delivery_date = payload.delivery_date
     },
-    UPDATE_TASK_ASSIGNMENT(state, {stateData: payload, data: data}){
+    UPDATE_TASK_ASSIGNMENT(state, { stateData: payload, data: data }) {
       data.forEach((assignee, i) => {
         state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].assignee.push(assignee)
       })
     },
-    REMOVE_ASSIGNEE(state, {stateData: payload, data: data, assigneeIndex: AI}){
+    REMOVE_ASSIGNEE(state, { stateData: payload, data: data, assigneeIndex: AI }) {
       state.selected_project.boards[data.boardIndex].task[data.taskIndex].assignee.splice(AI, 1)
     },
+    REMOVE_TASK(state, payload) {
+      state.selected_project.boards[payload.boardIndex].task.map((task, i) => { 
+        if(task.id == payload.id){
+          state.selected_project.boards[payload.boardIndex].task.splice(i, 1)
+        }
+      })
+    },
+
+
     UPDATE_BOARD_TASK(state, payload) {
       state.selected_project.boards.forEach((board, i) => {
         if (board.id == payload.board_id) {
@@ -80,32 +89,49 @@ export default {
         }
       })
     },
-    SAVE_BOARD(state, payload){
+    SAVE_BOARD(state, payload) {
       state.selected_project.boards.push(payload)
+    },
+    UPDATE_BOARD(state, payload) {
+      state.selected_project.boards.map((board, i) => { 
+        if(board.id == payload.id){
+          state.selected_project.boards[i].name = payload.name
+          state.selected_project.boards[i].description = payload.description
+          state.selected_project.boards[i].color = payload.color
+          state.selected_project.boards[i].updated_at = payload.updated_at
+        }
+      })
+    },
+    REMOVE_BOARD(state, payload) {
+      state.selected_project.boards.map((board, i) => { 
+        if(board.id == payload.id){
+          state.selected_project.boards.splice(i, 1)
+        }
+      })
     },
 
     /**
      *  Comment Mutations
      * 
      */
-     STORE_COMMENT(state, {resData: data, payload: payload}){
-        state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].comments.unshift(data)
-     },
+    STORE_COMMENT(state, { resData: data, payload: payload }) {
+      state.selected_project.boards[payload.boardIndex].task[payload.taskIndex].comments.unshift(data)
+    },
 
-     ADD_PROJECT_MEMBER(state, {data: data, payload: payload}){
-       if(state.selected_project.length > 0){
-         data.forEach((user, i) => {
-           state.selected_project.members.push(user.user)
-         })
-       }
-       state.projects.map((project) => {
-         if(project.id == payload.project_id){
+    ADD_PROJECT_MEMBER(state, { data: data, payload: payload }) {
+      if (state.selected_project.length > 0) {
+        data.forEach((user, i) => {
+          state.selected_project.members.push(user.user)
+        })
+      }
+      state.projects.map((project) => {
+        if (project.id == payload.project_id) {
           data.forEach((user, i) => {
             project.members.push(user.user)
           })
-         }
-       })
-     }
+        }
+      })
+    }
   },
   actions: {
     async getProjects({ commit }) {
@@ -152,7 +178,7 @@ export default {
      *  Task Section
      */
     async getTasks({ commit }, payload) {
-      const res = await API.get(`task/${payload}`).then(res => {
+      const res = await API.get(`task/${ payload }`).then(res => {
         commit('SET_PROJECT_TASKS', res.data.data)
         return res;
       }).catch(error => {
@@ -171,8 +197,19 @@ export default {
 
       return res;
     },
-    async updateTask({commit}, payload){
-      const res = await API.put(`task/${payload.id}`, payload).then(res => {
+    async deleteTask({ commit }, payload) {
+      console.log(payload)
+      const res = await API.delete(`task/${payload.id}`).then(res => {
+        commit('REMOVE_TASK', payload)
+        return res;
+      }).catch(error => {
+        return error.response;
+      })
+
+      return res;
+    },
+    async updateTask({ commit }, payload) {
+      const res = await API.put(`task/${ payload.id }`, payload).then(res => {
         commit('UPDATE_TASK_DATA', payload)
         return res;
       }).catch(error => {
@@ -181,9 +218,9 @@ export default {
 
       return res;
     },
-    async assignTask({commit}, payload){
+    async assignTask({ commit }, payload) {
       const res = await API.post(`task/assignee`, payload).then(res => {
-        commit('UPDATE_TASK_ASSIGNMENT', {stateData: payload, data: res.data.data})
+        commit('UPDATE_TASK_ASSIGNMENT', { stateData: payload, data: res.data.data })
         return res;
       }).catch(error => {
         return error.response;
@@ -191,9 +228,9 @@ export default {
 
       return res;
     },
-    async removeAssignee({commit}, {assignee: payload, data: data, assigneeIndex: AI}){
-      const res = await API.delete(`task/assignee/${payload.id}`).then(res => {
-        commit('REMOVE_ASSIGNEE', {stateData: payload, data: data, assigneeIndex: AI})
+    async removeAssignee({ commit }, { assignee: payload, data: data, assigneeIndex: AI }) {
+      const res = await API.delete(`task/assignee/${ payload.id }`).then(res => {
+        commit('REMOVE_ASSIGNEE', { stateData: payload, data: data, assigneeIndex: AI })
         return res;
       }).catch(error => {
         return error.response;
@@ -201,7 +238,7 @@ export default {
 
       return res;
     },
-    async updateTaskOrder({commit}, payload){
+    async updateTaskOrder({ commit }, payload) {
       const res = await API.post('task/update-order', payload).then(res => {
         return res;
       }).catch(error => {
@@ -216,7 +253,7 @@ export default {
      *  Board Section
      */
 
-    async storeBoard({commit}, payload){
+    async storeBoard({ commit }, payload) {
       const res = await API.post('board', payload).then(res => {
         commit('SAVE_BOARD', res.data.data)
         return res;
@@ -226,7 +263,17 @@ export default {
 
       return res;
     },
-    async updateBoardOrder({commit}, payload){
+    async updateBoard({ commit }, payload) {
+      const res = await API.put(`board/${payload.id}`, payload).then(res => {
+        commit('UPDATE_BOARD', res.data.data)
+        return res;
+      }).catch(error => {
+        return error.response;
+      })
+
+      return res;
+    },
+    async updateBoardOrder({ commit }, payload) {
       const res = await API.post('board/update-order', payload).then(res => {
         return res;
       }).catch(error => {
@@ -235,9 +282,19 @@ export default {
 
       return res;
     },
-    async updateBoardName({commit}, payload){
+    async updateBoardName({ commit }, payload) {
       const res = await API.post('board/update-name', payload).then(res => {
         commit('UPDATE_BOARD_NAME', payload)
+        return res;
+      }).catch(error => {
+        return error.response;
+      })
+
+      return res;
+    },
+    async deleteBoard({ commit }, payload) {
+      const res = await API.delete(`board/${ payload.id }`).then(res => {
+        commit('REMOVE_BOARD', payload)
         return res;
       }).catch(error => {
         return error.response;
@@ -254,9 +311,9 @@ export default {
      * 
      */
 
-    async storeComment({commit}, payload){
+    async storeComment({ commit }, payload) {
       const res = await API.post('task-comment', payload).then(res => {
-        commit('STORE_COMMENT', {resData: res.data.data, payload: payload})
+        commit('STORE_COMMENT', { resData: res.data.data, payload: payload })
         return res;
       }).catch(error => {
         return error.response;
@@ -269,9 +326,9 @@ export default {
      *  Project Members Section
      *  
      */
-    async addMembers({commit}, payload){
+    async addMembers({ commit }, payload) {
       const res = await API.post('project-member', payload).then(res => {
-        commit('ADD_PROJECT_MEMBER', {data: res.data.data, payload: payload})
+        commit('ADD_PROJECT_MEMBER', { data: res.data.data, payload: payload })
         return res;
       }).catch(error => {
         return error.response;
@@ -279,6 +336,6 @@ export default {
 
       return res;
     }
-    
+
   }
 }

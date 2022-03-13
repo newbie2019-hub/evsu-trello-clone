@@ -17,13 +17,7 @@
     </v-toolbar> -->
 
    <div class="chart-placeholder">
-    <apexchart
-     id="apex-chart-height"
-     class="h-100"
-     type="rangeBar"
-     :options="chartOptions"
-     :series="series"
-    ></apexchart>
+    <apexchart id="apex-chart-height" type="rangeBar" :options="chartOptions" :series="series"></apexchart>
    </div>
   </div>
  </div>
@@ -40,9 +34,17 @@
    series: [],
    chartOptions: {
     chart: {
-     width: '100%',
-     height: 350,
+     height: 450,
      type: 'rangeBar',
+    },
+    plotOptions: {
+     bar: {
+      horizontal: true,
+      distributed: true,
+      dataLabels: {
+       hideOverflowingLabels: false,
+      },
+     },
     },
     dataLabels: {
      enabled: true,
@@ -53,17 +55,17 @@
       var diff = b.diff(a, 'days');
       return diff + (diff > 1 ? ' days' : ' day');
      },
-    },
-    plotOptions: {
-     bar: {
-      horizontal: true,
-      dataLabels: {
-       hideOverflowingLabels: false,
-      },
+     style: {
+      colors: ['#f3f4f5', '#fff'],
      },
     },
     xaxis: {
      type: 'datetime',
+    },
+    legend: {
+     position: 'top',
+     horizontalAlign: 'left',
+     show: false,
     },
     grid: {
      row: {
@@ -81,7 +83,9 @@
     },
    },
   }),
-
+  mounted(){
+    this.chartState = false
+  },
   computed: {
    ...mapState('project', ['selected_project']),
    ...mapState('project', ['ganttChartState', 'chartData']),
@@ -107,23 +111,6 @@
      });
      this.series.push(series);
     });
-    // this.chartData.map((user) => {
-    //  series = {
-    //   name: '',
-    //   data: [],
-    //  };
-    //  series.name = user.info.first_name[0] + '. ' + user.info.last_name;
-    //  user.tasks.map((task) => {
-    //   if (task.project_id == this.selected_project.id) {
-    //    series.data.push({
-    //     x: task.task,
-    //     y: [
-    //      task.start_date ? new Date(task.start_date).getTime() : new Date(task.created_at).getTime(),
-    //      task.delivery_date ? new Date(task.delivery_date).getTime() : new Date(task.project.delivery_date).getTime(),
-    //     ],
-    //    });
-    //   }
-    //  });
    },
   },
   watch: {
@@ -153,7 +140,7 @@
   top: 0;
   left: 0;
   background: white;
-  height: 100%;
+  height: 100vh;
   width: 100%;
   z-index: 999;
   padding: 1rem 1rem;
