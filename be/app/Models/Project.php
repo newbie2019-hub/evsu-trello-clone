@@ -34,6 +34,10 @@ class Project extends Model
         return $this->hasMany(Board::class, 'project_id', 'id')->orderBy('order');
     }
 
+    public function tasks(){
+        return $this->hasMany(Task::class, 'project_id', 'id');
+    }
+
     public function setSlugAttribute($title){
         return $this->attributes['slug'] = $this->uniqueSlug($title);
     }

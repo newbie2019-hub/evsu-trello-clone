@@ -69,6 +69,17 @@ export default {
     REMOVE_MEMBER(state, { stateData: payload, memberIndex: AI }) {
       state.selected_project.members.splice(AI, 1)
     },
+    REMOVE_PROJECT_ASSIGNEE(state, { stateData: payload, memberIndex: AI }) {
+      state.selected_project.boards.map((board, b) => {
+        board.task.map((task, t) => {
+          task.assignee.map((assignee, a) => {
+            if(payload.id == assignee.info.id){
+              state.selected_project.boards[b].task[t].assignee.splice(a, 1)
+            }
+          })
+        })
+      })
+    },
     REMOVE_TASK(state, payload) {
       state.selected_project.boards[payload.boardIndex].task.map((task, i) => { 
         if(task.id == payload.id){
@@ -179,6 +190,7 @@ export default {
     async removeMember({ commit }, {project: project, member: payload, memberIndex: AI }) {
       const res = await API.delete(`project/${project.id}/member/${ payload.id }`).then(res => {
         commit('REMOVE_MEMBER', { stateData: payload, memberIndex: AI })
+        commit('REMOVE_PROJECT_ASSIGNEE', { stateData: payload, memberIndex: AI })
         return res;
       }).catch(error => {
         return error.response;

@@ -16,6 +16,22 @@ class ProjectController extends Controller
         $this->middleware('auth:api');
     }
 
+    public function dashboardProjects(){
+        $project = Project::whereRelation('members', 'user_id', auth()->user()->id)->orWhere('user_id', auth()->user()->id)->with([
+            'owner', 'owner.info', 'members', 'members.info', 
+            'tasks'])->withCount(['tasks as pending_tasks' => function($query){
+                $query->where('status', 'Pending');
+            }])->withCount(['tasks as inprogress_tasks' => function($query){
+                $query->where('status', 'In-Progress');
+            }])->withCount(['tasks as finished_tasks' => function($query){
+                $query->where('status', 'Finished');
+            }])->withCount(['tasks as nostatus_tasks' => function($query){
+                $query->whereNull('status')->orWhere('status', '');
+            }])->get();
+
+        return response()->json($project);
+    }
+
     public function index(){
         $project = Project::whereRelation('members', 'user_id', auth()->user()->id)->orWhere('user_id', auth()->user()->id)->with([
             'owner', 'owner.info', 'members', 'members.info', 

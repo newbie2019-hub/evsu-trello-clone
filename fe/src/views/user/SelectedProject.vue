@@ -632,10 +632,6 @@
      value: 'In-Progress',
     },
     {
-     text: 'For Testing',
-     value: 'For Testing',
-    },
-    {
      text: 'Finished',
      value: 'Finished',
     },

@@ -58,17 +58,20 @@
 
     <!--- Second row --->
     <v-row class="mt-10 mb-5">
-     <v-col cols="12" sm="12" md="11" lg="4">
+     <v-col cols="12" sm="12" md="11" lg="5" xl="5">
       <h1>Projects</h1>
       <p class="text-caption">Select a project from the dropdown below.</p>
-      <v-progress-circular class="mt-5" :rotate="-90" value="70" :size="240" :width="35" color="blue darken-1">
-       <p class="text-h4 font-poppins font-weight-bold">70%</p>
-      </v-progress-circular>
-      <p class="mt-6">Select Project</p>
-      <v-select :items="projects" label="" hide-details="auto" dense outlined class="w-75 w-md-80"></v-select>
+      <donut-chart />
      </v-col>
+     <v-col cols="12" sm="12" md="11" lg="5" xl="5">
+      <h1>Projects</h1>
+      <p class="text-caption">Select a project from the dropdown below.</p>
+      <scatter-chart />
+     </v-col>
+    </v-row>
 
-     <v-col cols="12" sm="12" md="11" lg="7">
+    <v-row>
+     <v-col cols="12" sm="12" md="11" lg="11" xl="8">
       <h1>Assigned Task</h1>
       <p class="text-caption">Shown below are the latest task assigned to you.</p>
       <v-data-table :headers="taskHeaders" :items="summary.tasks" :items-per-page="5" class="mt-4"></v-data-table>
@@ -81,9 +84,7 @@
       <h1>Project Activities</h1>
       <p class="text-caption">Shown below are the logs of the project.</p>
       <v-data-table :headers="headers" :items="summary.activity" :items-per-page="10" class="mt-4">
-       <template v-slot:item.user="{ item }">
-        {{item.user.info.first_name}} {{item.user.info.last_name}}
-       </template>
+       <template v-slot:item.user="{ item }"> {{ item.user.info.first_name }} {{ item.user.info.last_name }} </template>
       </v-data-table>
      </v-col>
     </v-row>
@@ -93,6 +94,8 @@
 </template>
 <script>
  import { mapState } from 'vuex';
+ import DonutChart from './components/DonutChart.vue';
+ import ScatterChart from './components/ScatterChart.vue';
  export default {
   data: () => ({
    projects: [
@@ -157,7 +160,6 @@
     { text: 'User', value: 'user' },
     { text: 'On Project', value: 'project.name' },
    ],
-   
   }),
   async mounted() {
    document.title = 'Dashboard - Welcome ';
@@ -166,6 +168,7 @@
   computed: {
    ...mapState('dashboard', ['summary']),
   },
+  components: { DonutChart, ScatterChart },
  };
 </script>
 <style>
