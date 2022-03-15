@@ -15,9 +15,9 @@
     </v-list-item-action>
    </v-list-item>
   </v-list>
-  <v-list v-if="projectActivity.length > 0">
+  <v-list v-if="projectActivity.data.length > 0">
    <v-timeline dense>
-    <v-timeline-item small v-for="(activity, i) in projectActivity" :key="i">
+    <v-timeline-item small v-for="(activity, i) in projectActivity.data" :key="i">
      <template v-slot:icon>
       <v-tooltip bottom>
        <template v-slot:activator="{ on, attrs }">
@@ -29,9 +29,7 @@
          >
         </v-btn>
        </template>
-       <span
-        ><small>{{ activity.user.info.first_name }} {{ activity.user.info.last_name }}</small></span
-       >
+       <span><small>{{ activity.user.info.first_name }} {{ activity.user.info.last_name }}</small></span>
       </v-tooltip>
      </template>
      <div class="line-height-small">
@@ -42,6 +40,7 @@
      </div>
     </v-timeline-item>
    </v-timeline>
+   <v-btn class="mb-3 ml-4" v-if="projectActivity.last_page != page" @click="getProjectLogs" color="primary darken-1" :loading="isLoading">Load More</v-btn>
   </v-list>
   <p class="text-subtitle ml-4 font-poppins" v-else>No activities for this project.</p>
  </v-navigation-drawer>
@@ -51,6 +50,7 @@
  export default {
   data: () => ({
    isLoading: false,
+   page: 1,
    isOpened: {
     get() {
      return this.$store.state['logs'].logState;
@@ -63,9 +63,18 @@
   mounted() {
    this.isOpened = false
   },
-  methods: {},
+  methods: {
+   async getProjectLogs() {
+    this.isLoading = true
+    const page = this.page + 1
+    await this.$store.dispatch('logs/getProjectActivity', {payload: this.selected_project.id, page: page});
+    this.page += 1
+    this.isLoading = false
+   },
+  },
   computed: {
    ...mapState('logs', ['logState', 'projectActivity']),
+   ...mapState('project', ['selected_project']),
   },
   watch: {
    logState() {

@@ -5,7 +5,9 @@ export default {
   state: {
     logs: [],
     projectLogs: [],
-    projectActivity: [],
+    projectActivity: {
+      current_page: null
+    },
     logState: false,
   },
   getters: {
@@ -24,7 +26,21 @@ export default {
      state.logs = payload
     },
     SET_PROJECT_ACTIVITY(state, payload){
-     state.projectActivity = payload
+      if(payload.current_page == 1){
+        state.projectActivity = payload
+      }
+      else {
+        payload.data.map((data) => {
+          state.projectActivity.data.push(data)
+        })
+        state.projectActivity.current_page = payload.current_page
+        state.projectActivity.last_page = payload.last_page
+        state.projectActivity.first_page_url = payload.first_page_url
+        state.projectActivity.next_page_url = payload.next_page_url
+        state.projectActivity.prev_page_url = payload.prev_page_url
+        state.projectActivity.to = payload.to
+        state.projectActivity.from = payload.from
+      }
     },
     SET_PROJECT_LOGS(state, payload){
      state.projectLogs = payload
@@ -51,9 +67,9 @@ export default {
 
     return res;
    },
-   async getProjectActivity({commit}, payload){
-    console.log(payload)
-    const res = await API.post(`project-activity/${payload}`).then(res => {
+   async getProjectActivity({commit}, {payload: payload, page: page}){
+     console.log(page)
+    const res = await API.post(`project-activity/${payload}?page=${page}`).then(res => {
       commit('SET_PROJECT_ACTIVITY', res.data.data)
       return res;
     }).catch(error => {

@@ -21,7 +21,7 @@ class ProjectLogController extends Controller
     }
 
     public function getProjectActivity($id){
-        $projAct = ProjectLog::where('project_id', $id)->with(['user.info'])->latest()->take(15)->get();
+        $projAct = ProjectLog::where('project_id', $id)->with(['user.info'])->latest()->paginate(10);
         return $this->success('Project Logs has been retrieved successfully!', $projAct);
     }
 }

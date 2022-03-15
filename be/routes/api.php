@@ -49,6 +49,7 @@ Route::middleware('api')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index']);
 
     Route::apiResource('project-member', ProjectMemberController::class);
+    Route::delete('project/{projectid}/member/{id}', [ProjectController::class, 'removeProjectMember']);
     Route::apiResource('project', ProjectController::class);
     
     Route::post('board/update-order', [ProjectBoardController::class, 'updateOrder']);

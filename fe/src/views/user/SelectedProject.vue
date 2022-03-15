@@ -12,18 +12,35 @@
      <p class="text-caption">This project was created by {{ getOwner() }} on {{ this.selected_project.created_at }}</p>
      <v-slide-group multiple show-arrows class="mt-5">
       <v-slide-item v-for="(member, i) in selected_project.members" :key="i" v-slot="{}">
-       <v-tooltip bottom>
+       <v-menu bottom left offset-x>
+        <template v-slot:activator="{ on: menu, attrs }">
+         <v-tooltip bottom>
+          <template v-slot:activator="{ on: tooltip }">
+           <v-btn small fab elevation="0" class="ml-1" v-bind="attrs" v-on="{ ...tooltip, ...menu }">
+            <v-avatar size="40" color="primary"
+             ><span class="white--text"
+              >{{ member.info.first_name[0] }}{{ member.info.last_name[0] }}</span
+             ></v-avatar
+            >
+           </v-btn>
+          </template>
+          <span>{{ member.info.first_name }} {{ member.info.last_name }}</span>
+         </v-tooltip>
+        </template>
+        <v-list class="pa-0">
+         <v-list-item class="pa-0 ma-0">
+          <v-btn @click.prevent="removeMember(selected_project, member, i)" text depressed color="red darken-1">Remove</v-btn>
+         </v-list-item>
+        </v-list>
+       </v-menu>
+       <!-- <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
          <v-btn v-bind="attrs" v-on="on" small fab elevation="0" class="ml-1">
-          <v-avatar size="40" color="primary"
-           ><span class="white--text">{{ member.info.first_name[0] }}{{ member.info.last_name[0] }}</span></v-avatar
-          >
+          <v-avatar size="40" color="primary"><span class="white--text">{{ member.info.first_name[0] }}{{ member.info.last_name[0] }}</span></v-avatar>
          </v-btn>
         </template>
-        <span
-         ><small>Member - {{ member.info.first_name[0] }}. {{ member.info.last_name }}</small></span
-        >
-       </v-tooltip>
+        <span><small>Member - {{ member.info.first_name[0] }}. {{ member.info.last_name }}</small></span>
+       </v-tooltip> -->
       </v-slide-item>
       <v-tooltip bottom>
        <template v-slot:activator="{ on, attrs }">
@@ -143,10 +160,19 @@
           :key="t"
           class="mt-2 pt-2 pl-3 pr-2 pb-1 rounded-lg cursor-pointer task-card-hover"
           elevation="1"
-          >
+         >
           <p class="pr-3">{{ task.task }}</p>
           <div class="task-icon-container">
-           <v-btn @click.stop="boardDeleteData.boardIndex = i; boardDeleteData.id = task.id; deleteTaskDialog = true;" icon x-small color="red">
+           <v-btn
+            @click.stop="
+             boardDeleteData.boardIndex = i;
+             boardDeleteData.id = task.id;
+             deleteTaskDialog = true;
+            "
+            icon
+            x-small
+            color="red"
+           >
             <v-icon>mdi-close</v-icon>
            </v-btn>
           </div>
@@ -538,7 +564,7 @@
    editBoardName: null,
    boardUpdateData: [],
    boardDeleteData: {
-     id: null
+    id: null,
    },
    showAddBoard: false,
    taskDialog: false,
@@ -698,8 +724,8 @@
    async getChartData() {
     await this.$store.dispatch('project/getTasks', this.selected_project.id);
    },
-   async getProjectLogs() {
-    await this.$store.dispatch('logs/getProjectActivity', this.selected_project.id);
+   async getProjectLogs(page = 1) {
+    await this.$store.dispatch('logs/getProjectActivity', { payload: this.selected_project.id, page: page });
    },
    addMemberDialog() {
     this.$store.commit('project/SET_MEMBER_DIALOG', true);
@@ -873,6 +899,16 @@
      this.showToast(data, 'error');
     }
    },
+   async removeMember(selectedProject, member, i) {
+    const { status, data } = await this.$store.dispatch('project/removeMember', {
+     project: selectedProject,
+     member: member,
+     memberIndex: i,
+    });
+    if (status != 200) {
+     this.showToast(data, 'error');
+    }
+   },
    async updateTask() {
     this.isLoading = true;
     const { status, data } = await this.$store.dispatch('project/updateTask', this.taskData);
@@ -938,10 +974,9 @@
  };
 </script>
 <style>
-.task-icon-container
-{
+ .task-icon-container {
   position: absolute;
   top: 7px;
   right: 10px;
-}
+ }
 </style>

@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProjectRequest;
 use App\Models\Project;
+use App\Models\ProjectMember;
+use App\Models\Task;
+use App\Models\TaskAssignee;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
@@ -47,5 +50,18 @@ class ProjectController extends Controller
     public function destroy($id){
         Project::destroy($id);
         return $this->success('Project has been deleted successfully!');
+    }
+
+    public function removeProjectMember($projectid, $id){
+        $proj = ProjectMember::where('user_id', $id)->where('project_id', $projectid)->first();
+        $task = Task::where('project_id', $proj->project_id)->whereRelation('assignee', 'user_id', $proj->user_id)->get();
+        if($task){
+            foreach($task as $assignee){
+              TaskAssignee::where('user_id', $id)->where('task_id', $assignee->id)->delete();
+            }
+        }
+        // $task->assignee->delete();
+        ProjectMember::where('user_id', $id)->delete();
+        return $this->success('Project member has been removed successfully!', $task);
     }
 }
