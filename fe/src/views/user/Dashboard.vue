@@ -58,14 +58,12 @@
 
     <!--- Second row --->
     <v-row class="mt-10 mb-5">
-     <v-col cols="12" sm="12" md="11" lg="5" xl="5">
-      <h1>Projects</h1>
-      <p class="text-caption">Select a project from the dropdown below.</p>
+     <v-col cols="12" sm="12" md="5" lg="5" xl="5" class="">
       <donut-chart />
      </v-col>
-     <v-col cols="12" sm="12" md="11" lg="5" xl="5">
-      <h1>Projects</h1>
-      <p class="text-caption">Select a project from the dropdown below.</p>
+     <v-col cols="12" sm="12" md="5" lg="5" xl="5">
+      <h1>Project Task</h1>
+      <p class="text-caption">Shown below are the task for all projects you're working.</p>
       <scatter-chart />
      </v-col>
     </v-row>
