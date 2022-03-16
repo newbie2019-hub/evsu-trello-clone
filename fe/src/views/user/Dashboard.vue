@@ -64,7 +64,7 @@
      <v-col cols="12" sm="12" md="5" lg="5" xl="5">
       <h1>Project Task</h1>
       <p class="text-caption">Shown below are the task for all projects you're working.</p>
-      <scatter-chart />
+      <bar-chart />
      </v-col>
     </v-row>
 
@@ -93,7 +93,7 @@
 <script>
  import { mapState } from 'vuex';
  import DonutChart from './components/DonutChart.vue';
- import ScatterChart from './components/ScatterChart.vue';
+ import BarChart from './components/BarChart.vue';
  export default {
   data: () => ({
    projects: [
@@ -166,7 +166,7 @@
   computed: {
    ...mapState('dashboard', ['summary']),
   },
-  components: { DonutChart, ScatterChart },
+  components: { DonutChart, BarChart },
  };
 </script>
 <style>

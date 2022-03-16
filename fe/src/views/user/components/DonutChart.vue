@@ -3,7 +3,7 @@
   <h1>{{ projectName }}</h1>
   <p class="text-caption">Select a project from the dropdown below.</p>
   <div class="mt-5">
-   <apexchart type="donut" :options="chartOptions" :series="series"></apexchart>
+   <apexchart type="donut" height="450" :options="chartOptions" :series="series" ></apexchart>
    <v-layout align-center>
     <p class="mr-2 mb-5 mt-5">Select:</p>
     <v-select
@@ -31,7 +31,6 @@
      type: 'donut',
     },
     labels: [],
-    
     noData: {
      text: 'No data available',
      align: 'center',

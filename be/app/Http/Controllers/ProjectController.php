@@ -32,6 +32,14 @@ class ProjectController extends Controller
         return response()->json($project);
     }
 
+    public function dashboardProjectTask(){
+        $project = Project::whereRelation('members', 'user_id', auth()->user()->id)->orWhere('user_id', auth()->user()->id)->with([
+            'owner', 'owner.info', 'members', 'members.info', 
+            'tasks'])->withCount(['tasks'])->get();
+
+            return $this->success('Data retrieved successfully!', $project);
+    }
+
     public function index(){
         $project = Project::whereRelation('members', 'user_id', auth()->user()->id)->orWhere('user_id', auth()->user()->id)->with([
             'owner', 'owner.info', 'members', 'members.info', 
