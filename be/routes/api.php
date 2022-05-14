@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MemberRoleController;
 use App\Http\Controllers\ProjectBoardController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectLogController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\ProjectTaskController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\UserLogController;
+use App\Models\MemberRole;
 use App\Models\ProjectLog;
 use App\Models\ProjectMember;
 use Illuminate\Http\Request;
@@ -52,6 +54,7 @@ Route::middleware('api')->group(function () {
     Route::delete('project/{projectid}/member/{id}', [ProjectController::class, 'removeProjectMember']);
     Route::get('project-dashboard/task', [ProjectController::class, 'dashboardProjectTask']);
     Route::get('project-dashboard', [ProjectController::class, 'dashboardProjects']);
+    Route::post('project/selectedProject', [ProjectController::class, 'getSelectedProject']);
     Route::apiResource('project', ProjectController::class);
     
     Route::post('board/update-order', [ProjectBoardController::class, 'updateOrder']);
@@ -64,6 +67,7 @@ Route::middleware('api')->group(function () {
     Route::get('task/{id}', [ProjectTaskController::class, 'getProjectTasks']);
     Route::apiResource('task', ProjectTaskController::class);
     
+    Route::get('roles', [MemberRoleController::class, 'index']);
     Route::apiResource('task-comment', TaskCommentController::class);
     
     Route::get('account-logs', [UserLogController::class, 'index']);

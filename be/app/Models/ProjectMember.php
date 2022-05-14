@@ -25,5 +25,7 @@ class ProjectMember extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-
+    public function role(){
+        return $this->belongsTo(MemberRole::class, 'member_role_id', 'id');
+    }
 }

@@ -32,5 +32,6 @@ export default {
  top: 1.5rem;
  left: 1.5rem;
  max-width: 400px;
+ z-index: 99;
 }
 </style>

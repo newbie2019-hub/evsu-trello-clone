@@ -72,4 +72,8 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(UserInfo::class, 'user_info_id', 'id');
     }
 
+    public function role(){
+        return $this->hasOneThrough(MemberRole::class, ProjectMember::class, 'user_id', 'id', 'id', 'member_role_id');
+    }
+
 }

@@ -8,6 +8,7 @@ export default {
     addMemberDialog: false,
     ganttChartState: false,
     chartData: [],
+    roles: []
   },
   getters: {
     GET_SELECTED_PROJECT_MEMBERS(state) {
@@ -18,6 +19,9 @@ export default {
     }
   },
   mutations: {
+    SET_ROLES(state, payload) {
+      state.roles = payload
+    },
     SET_MEMBER_DIALOG(state, payload) {
       state.addMemberDialog = payload
     },
@@ -148,6 +152,26 @@ export default {
     }
   },
   actions: {
+    async getRoles({ commit }) {
+      const res = await API.get('roles').then(res => {
+        commit('SET_ROLES', res.data)
+        return res;
+      }).catch(error => {
+        return error.response;
+      })
+
+      return res;
+    },
+    async getSelectedProject({ commit }, payload) {
+      const res = await API.post('project/selectedProject', payload).then(res => {
+        commit('SET_SELECTED', res.data)
+        return res;
+      }).catch(error => {
+        return error.response;
+      })
+
+      return res;
+    },
     async getProjects({ commit }) {
       const res = await API.get('project').then(res => {
         commit('SET_PROJECTS', res.data)
@@ -160,6 +184,15 @@ export default {
     },
     async storeProject({ commit }, payload) {
       const res = await API.post('project', payload).then(res => {
+        return res;
+      }).catch(error => {
+        return error.response;
+      })
+
+      return res;
+    },
+    async updateMemberRole({ commit }, payload) {
+      const res = await API.put(`project-member/${payload.project_id}`, payload).then(res => {
         return res;
       }).catch(error => {
         return error.response;

@@ -1,132 +1,182 @@
 <template>
- <div class="sidebar">
-  <div class="profile-container">
-   <v-avatar color="grey darken-1" size="90" class="mt-5">
-    <img v-if="user.info.image" class="img-cover" :src="`http://127.0.0.1:8000/images/${this.user.info.image}`" alt="John">
-    <span v-else class="white--text text-h4">{{this.user.info.first_name[0] + this.user.info.last_name[0]}}</span>
-   </v-avatar>
-   <div class="profile-container--info">
-    <p class="font-weight-bold">{{this.user.info.first_name + ' ' + this.user.info.last_name}}</p>
-    <p class="text-caption font-poppins">{{this.user.email}}</p>
-   </div>
+  <div>
+    <v-app-bar elevation="2" :color="$vuetify.theme.isDark ? '' : 'white'" class="pt-2 pr-2" fixed height="68">
+      <v-app-bar-nav-icon class="ml-2" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-spacer></v-spacer>
+      <v-btn icon @click.prevent="setDarkMode">
+        <v-icon color="blue darken-2"> {{ setToggleIcon() }} </v-icon>
+      </v-btn>
+      <v-btn icon @click.prevent="setLogDrawerState" text v-if="$route.name == 'Project'">
+        <v-icon size="25" color="blue darken-2">mdi-history</v-icon>
+      </v-btn>
+      <v-menu v-if="user.info" transition="slide-y-transition" :close-on-content-click="false" content-class="elevation-3" v-model="showMenu" absolute bottom left style="max-width: 450px">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn icon text v-on="on" v-bind="attrs" color="blue darken-2">
+            <v-icon>mdi-bell-outline</v-icon>
+          </v-btn>
+        </template>
+
+        <v-card elevation="0" class="pl-5 pr-5 pt-2 pb-1">
+          <v-list dense>
+            <v-subheader>NOTIFICATIONS</v-subheader>
+          </v-list>
+        </v-card>
+      </v-menu>
+    </v-app-bar>
+
+    <v-navigation-drawer class="pt-4 pl-0 pr-0 pb-2" width="235" elevation="1" v-model="drawer" app>
+      <p class="ml-5 mb-4 mt-2">Main Menu</p>
+      <v-list dense v-for="(item, i) in items" :key="i" class="pa-0 mb-1">
+        <v-list-item link :to="item.link" active-class="v-list-active--item">
+          <v-list-item-content class="ml-4 pa-0">
+            <v-list-item-title class="font-weight-regular">
+              <v-icon size="22" class="mr-2">
+                {{ item.icon }}
+              </v-icon>
+              {{ item.title }}
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+      <p class="ml-5 mb-4 mt-6">Logs</p>
+      <v-list dense v-for="(item, i) in logItems" :key="i + 7" class="pa-0 mb-1">
+        <v-list-item link :to="item.link" active-class="v-list-active--item">
+          <v-list-item-content class="ml-4 pa-0">
+            <v-list-item-title class="font-weight-regular">
+              <v-icon size="22" class="mr-2">
+                {{ item.icon }}
+              </v-icon>
+              {{ item.title }}
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+      <template v-slot:append>
+        <v-list-item two-line class="mb-2">
+          <v-list-item-avatar size="50" class="ma-0" color="primary">
+            <img class="cursor-pointer" v-if="user.info.profile_img" :src="`http://127.0.0.1:8000/images/profiles/${user.info.profile_img}`" />
+            <p v-else class="white--text font-weight-bold mb-0">{{ user.info.first_name[0] }}{{ user.info.last_name[0] }}</p>
+          </v-list-item-avatar>
+
+          <v-list-item-content class="ml-2 line-height-small">
+            <v-list-item-title>
+              <p class="mb-1 font-weight-bold">{{ `${user.info.last_name}, ${user.info.first_name}` }}</p>
+            </v-list-item-title>
+            <v-list-item-subtitle>
+              <v-btn @click.stop="logoutDialog = true" small color="red darken-2" text class="pa-0">
+                <v-icon small> mdi-exit-to-app </v-icon>
+                Log-out
+              </v-btn>
+            </v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </template>
+    </v-navigation-drawer>
+
+    <v-dialog v-model="logoutDialog" max-width="500">
+      <v-card>
+        <v-card-title class="text-h5"> Confirm Log-out </v-card-title>
+        <h4 class="font-weight-light ml-6 mr-5 mb-5">Are you sure you want to logout your account?</h4>
+        <v-card-actions class="pb-2">
+          <v-spacer></v-spacer>
+          <v-btn color="grey darken-2" large text @click="logoutDialog = false"> Cancel </v-btn>
+          <v-btn color="red darken-1" large text @click="logout" :loading="btnLoading"> Logout </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
-  <p class="text-subtitle-2 ml-4 font-weight-bold">MAIN</p>
-  <router-link to="/user/dashboard">
-   <v-icon class="mr-1"> mdi-view-dashboard </v-icon>
-   Dashboard
-  </router-link>
-  <v-divider class="ml-8 mr-8"/>
-  <router-link to="/user/activities">
-   <v-icon class="mr-1"> mdi-playlist-check </v-icon>
-   Activities
-  </router-link>
-  <v-divider class="ml-8 mr-8"/>
-  <router-link to="/user/logs">
-   <v-icon class="mr-1"> mdi-history </v-icon>
-   Logs
-  </router-link>
-  <v-divider class="ml-8 mr-8"/>
-  <router-link to="/user/settings">
-   <v-icon class="mr-1"> mdi-account-cog-outline </v-icon>
-   Settings
-  </router-link>
-  <v-divider class="ml-8 mr-8"/>
-
-  <p class="text-subtitle-2 ml-4 mt-6 font-weight-bold">PROJECTS</p>
-  <router-link to="/user/projects" :class="{'router-link-exact-active router-link-active' : activeState}">
-   <v-icon class="mr-1"> mdi-lightbulb-on-outline </v-icon>
-   Projects
-  </router-link>
-  <v-divider class="ml-8 mr-8"/>
-
-  <div class="logout-container">
-   <v-btn @click.stop="dialog = true" text color="error">
-    <v-icon class="mr-1"> mdi-close-circle-outline </v-icon>
-    Log Out
-   </v-btn>
-  </div>
-
-  <v-dialog v-model="dialog" max-width="420">
-   <v-card>
-    <v-card-title class="text-h5"> Confirm Log-out </v-card-title>
-    <v-card-text class="mt-3 mb-3">
-     Are you sure you want to logout your account?
-    </v-card-text>
-    <v-card-actions>
-     <v-spacer></v-spacer>
-     <v-btn color="grey darken-2" text @click="dialog = false"> Cancel </v-btn>
-     <v-btn color="red darken-1" text @click="logout"> Logout </v-btn>
-    </v-card-actions>
-   </v-card>
-  </v-dialog>
- </div>
 </template>
 <script>
-import {mapState} from 'vuex'
-import API from '../../../store/base'
-export default {
-  data: () => ({
-   dialog: false,
-   activeState: false,
-  }),
-  mounted() {
-
-  },
-  computed: {
-    ...mapState('auth', ['user'])
-  },
-  methods: {
-   async logout(){
-    this.dialog = false
-    const {status} = await this.$store.dispatch('auth/logout')
-    if (status == 200){
-     const alert = {
-       msg: 'Log-out successful',
-       isVisible: true,
-       alertType: 'success'
-     }
-     this.$router.push({name: 'Login'})
-     this.$store.commit('alert/setAlert', alert)
-    }
-   },
-   async uploadProfileImage(){
-      if(this.data.profileimg){
+  import API from '@/store/base';
+  import { mapState } from 'vuex';
+  export default {
+    data: () => ({
+      drawer: true,
+      group: null,
+      showMenu: false,
+      logoutDialog: false,
+      btnLoading: false,
+      items: [
+        { title: 'Dashboard', icon: 'mdi-view-dashboard', link: '/user/dashboard' },
+        { title: 'Activities', icon: 'mdi-playlist-check', link: '/user/activities' },
+        { title: 'Account Logs', icon: 'mdi-history', link: '/user/logs', role: '/user/logs' },
+        { title: 'Settings', icon: 'mdi-account-cog-outline', link: '/user/settings' },
+      ],
+      logItems: [{ title: 'Projects', icon: 'mdi-package', link: '/user/projects' }],
+      overwriteBreakpoint: false,
+    }),
+    async mounted() {},
+    methods: {
+      setLogDrawerState() {
+        console.log('Clicked');
+        this.$store.commit('logs/SET_LOG_STATE', true);
+      },
+      async setDarkMode() {
+        const darkMode = !JSON.parse(localStorage.getItem('darkMode'));
+        this.$vuetify.theme.dark = darkMode;
+        localStorage.setItem('darkMode', darkMode);
+      },
+      setToggleIcon() {
+        return JSON.parse(localStorage.getItem('darkMode')) ? 'mdi-weather-sunny' : 'mdi-weather-night';
+      },
+      async logout() {
+        this.btnLoading = true;
+        const { status, data } = await this.$store.dispatch('auth/logout');
+        this.toastData(status, data);
+        this.btnLoading = false;
+        this.$router.push('/');
+        this.logoutDialog = false;
+      },
+      async uploadProfileImage(event) {
         let formData = new FormData();
-        formData.append("img", this.data.profileimg);
-        await API.post(`user/upload-profile`, formData, {
+        formData.append('img', event.target.files[0]);
+        await API.post(`update-profile`, formData, {
           headers: {
-            "Content-Type": "multipart/form-data"
+            'Content-Type': 'multipart/form-data',
           },
-          }).then(response => {
-            this.data.profileimg = null
-            const alert = {
-              msg: 'Profile image updated successfully!',
-              isVisible: true,
-              alertType: 'success'
-            }
-            this.$store.commit('alert/setAlert', alert)
+        })
+          .then((response) => {
+            this.toastData(200, { msg: 'Profile image updated successfully!' });
           })
-          .catch(error => {
+          .catch((error) => {
             console.log({ error });
           });
-            await this.$store.dispatch('auth/checkAuthUser')
-      }
-      else {
-        this.$toast.error('Please select an image')
-      }
-   },
-
-  },
-  watch: {
-    $route (to, from){
-      if(to.name == 'Project' || to.name == 'Projects'){
-        this.activeState = true
-      }
-      else {
-        this.activeState = false
-      }
-    }
-  }
- };
+        await this.$store.dispatch('auth/checkUser');
+      },
+    },
+    computed: {
+      ...mapState('auth', ['user']),
+    },
+    watch: {
+      group() {
+        this.drawer = false;
+      },
+    },
+  };
 </script>
-<style></style>
+<style>
+  .v-list .v-list-active--item {
+    /* background-color: #9c5353; */
+    color: #3b85df;
+    position: relative;
+  }
+
+  .v-list-active--item.v-list-item--link:before {
+    content: '';
+    opacity: 1;
+    background: #3b85df;
+    position: absolute;
+    top: 0;
+    width: 4px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+  }
+
+  .v-navigation-drawer__content {
+    width: 100%;
+  }
+
+  .v-toolbar__content {
+    padding-bottom: 1rem !important;
+  }
+</style>

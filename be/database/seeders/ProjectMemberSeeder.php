@@ -18,16 +18,19 @@ class ProjectMemberSeeder extends Seeder
         ProjectMember::create([
             'project_id' => 1,
             'user_id' => 2,
+            'member_role_id' => rand(1, 8)
         ]);
 
         ProjectMember::create([
             'project_id' => 1,
             'user_id' => 3,
+            'member_role_id' => rand(1, 8)
         ]);
 
         ProjectMember::create([
             'project_id' => 2,
             'user_id' => 4,
+            'member_role_id' => rand(1, 8)
         ]);
 
     }

@@ -38,13 +38,14 @@
       <v-data-table :headers="headers" :items="projects" :search="search" :items-per-page="10" class="mt-4">
        <template v-slot:item.members="{ item }">
         <v-layout d-flex>
-         <v-tooltip bottom v-for="(member, i) in item.members" :key="i">
+         <v-tooltip bottom v-for="(member, i) in item.project_members" :key="i">
           <template v-slot:activator="{ on, attrs }">
            <v-btn v-bind="attrs" v-on="on" x-small fab elevation="0" class="ml-n5">
-            <v-avatar size="32" :color="randomColor(i)"><span class="white--text">{{ member.info.first_name[0] }}{{ member.info.last_name[0] }}</span></v-avatar>
+            <v-avatar size="32" :color="randomColor(i)"><span class="white--text">{{ member.user.info.first_name[0] }}{{ member.user.info.last_name[0] }}</span></v-avatar>
            </v-btn>
           </template>
-          <span><small>{{ member.info.first_name[0] }}. {{ member.info.last_name }}</small></span>
+          <span class="text-center"><small>{{ member.user.info.first_name[0] }}. {{ member.user.info.last_name }}</small></span><br/>
+          <span class="text-center"><small>{{ member.role && member.role.role }}</small></span>
          </v-tooltip>
          <v-btn color="primary" v-if="item.owner.id == user.id" @click.stop="addMemberDialog(item.id)" x-small fab elevation="0" class="dashed-border ml-n5">
           <v-icon> mdi-plus </v-icon>

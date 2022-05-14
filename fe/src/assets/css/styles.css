@@ -9,6 +9,9 @@
  --main-hover-primary-color: #7db8f0;
 }
 
+.v-list-item .v-list-item__title, .v-list-item .v-list-item__subtitle {
+  line-height: 1 !important;
+}
 .bg-hero {
  background-image: linear-gradient(to right, rgba(19, 18, 18, 0.925), rgba(29, 2, 2, 0.459)), url('../img/bg-hero.jpg');
  background-position: center;
@@ -123,7 +126,7 @@ input[type="file"] {
 
 /** Content Container */
 .content {
- margin-left: 270px;
+ margin-left: 50px;
  margin-top: 1.5rem;
 }
 

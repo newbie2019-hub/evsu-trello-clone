@@ -27,7 +27,8 @@ class ProjectMemberController extends Controller
                     if(empty($owner)){
                         $member = ProjectMember::create([
                             'project_id' => $request->project_id,
-                            'user_id' => $user->id
+                            'user_id' => $user->id,
+                            // 'role_id' => $user->role_id
                         ]);
 
                         $member->load(['user', 'user.info']);
@@ -48,5 +49,17 @@ class ProjectMemberController extends Controller
             return $this->error('No invitations was sent! Please check if the email addresses are valid.');
         }
       
+    }
+
+    public function update(Request $request, $id){
+       $projectMember = ProjectMember::where('user_id', $request->user_id)->where('project_id', $request->project_id)->first();
+       if($projectMember){
+           $projectMember->update([
+               'member_role_id' => $request->role_id
+           ]);
+       }
+       else {
+           return $this->error('Data passed to the server is invalid');
+       }
     }
 }

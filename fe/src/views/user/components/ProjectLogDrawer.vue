@@ -1,5 +1,5 @@
 <template>
- <v-navigation-drawer v-model="isOpened" fixed temporary right width="420" class="pr-2 pl-3 pt-5">
+ <v-navigation-drawer v-model="isOpened" fixed temporary right width="380" class="pr-2 pl-3 pt-5">
   <v-list>
    <v-list-item>
     <v-list-item-content>
@@ -35,8 +35,8 @@
      <div class="line-height-small">
       <!-- <p class="text-h6 mb-0">{{ activity.name }}</p> -->
       <!-- <p class="text-subtitle-2 mt-0 pt-0"></p> -->
-      <p class="">{{ activity.description }}</p>
-      <small>{{ activity.created_at }}</small>
+      <span class="grey--text"><small>{{ activity.created_at }}</small></span>
+      <p class=""><small>{{ activity.description }}</small></p>
      </div>
     </v-timeline-item>
    </v-timeline>

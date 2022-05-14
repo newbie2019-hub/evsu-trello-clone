@@ -5,7 +5,7 @@
     <h1>Summary</h1>
     <p class="text-caption">Welcome back, here is the summary for your account.</p>
     <v-row class="mt-3">
-     <v-col cols="12" sm="12" md="11" lg="11" xl="10">
+     <v-col cols="12" sm="12" md="12" lg="11" xl="11">
       <v-row>
        <v-col cols="6" sm="6" md="6" lg="4" xl="4">
         <v-card color="green lighten-1" class="mx-auto pt-7 pl-5 pr-5 pb-3" outlined flat hover rounded="xl">

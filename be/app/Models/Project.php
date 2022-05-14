@@ -30,6 +30,10 @@ class Project extends Model
         return $this->hasManyThrough(User::class, ProjectMember::class, 'project_id', 'id', 'id', 'user_id');
     }
 
+    public function project_members(){
+        return $this->hasMany(ProjectMember::class, 'project_id', 'id');
+    }
+
     public function boards(){
         return $this->hasMany(Board::class, 'project_id', 'id')->orderBy('order');
     }
