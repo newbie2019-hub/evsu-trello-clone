@@ -36,7 +36,7 @@
                       small
                       @click.prevent="
                         setRoleDialog = true;
-                        selectedProject.user_id = member.id;
+                        selectedProject.user_id = member.user_id;
                         selectedProject.project_id = selected_project.id;
                       "
                       text
