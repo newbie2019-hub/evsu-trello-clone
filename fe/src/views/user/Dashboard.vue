@@ -28,7 +28,7 @@
           <v-row align="center" justify="center">
            <v-col cols="6">
             <p class="white--text text-h2 font-weight-bold font-poppins">
-             <span v-if="summary.tasks.length < 10" class="">0</span>{{ summary.tasks.length }}
+             <span v-if="summary.tasks && summary.tasks.length < 10" class="">0</span>{{ summary.tasks && summary.tasks.length }}
             </p>
             <p class="white--text text-h6 font-weight-bold font-poppins">Tasks</p>
            </v-col>

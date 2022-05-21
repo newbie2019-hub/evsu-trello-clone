@@ -106,7 +106,7 @@ class AuthController extends Controller
         ]);
 
         auth()->logout();
-        return response()->json(['message' => 'User logged out successfully!']);
+        return $this->success('Logout successful!');
     }
 
     public function profileImg(Request $request){

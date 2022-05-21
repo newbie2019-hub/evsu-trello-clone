@@ -1,6 +1,6 @@
 <template>
  <div id="chart">
-  <apexchart type="bar" height="390" :options="chartOptions" :series="series"></apexchart>
+  <apexchart ref="barChart" type="bar" height="390" :options="chartOptions" :series="series"></apexchart>
  </div>
 </template>
 <script>
@@ -64,6 +64,8 @@
   async mounted() {
    await this.getProjects();
   },
+  destroyed(){
+  },
   watch: {
    dashboardProjectsTask() {
     if (this.dashboardProjectsTask.length > 0) {
@@ -74,7 +76,7 @@
      });
      this.series.push({ name: 'Tasks' });
      this.series[0].data = data
-     console.log(data);
+     // console.log(data);
     }
    },
   },

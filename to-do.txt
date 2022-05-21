@@ -1,3 +1,9 @@
+1. Mabubutangan ba ini hiya hin file ha task? Like ha usa na Task han project puede hiya mag upload hin file.
+2. Kun i click daw an Finish ha task magawas daw kuno an Date Finished kun kakan o natapos bagan actual ba na date ddi ha dashboard han assigned task.Date Finished - 2022-05-23 amo ada ini iya ibig sabihin
+3. Ma notif hiya na Overdue na an Project
+4. An Issues dire na count. [x]
+5. Kun na log out hiya ya sgela hiya hin loading kailangan ko pa hiya ig refresh tas aadto na ako ha LogIn Page [x]
+
 To-Do
 03-15-2022
 add remove on project member  [x]

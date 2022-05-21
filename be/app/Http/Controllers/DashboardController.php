@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $task = Task::whereRelation('assignee', 'user_id', auth()->user()->id)
         ->orWhere('user_id', auth()->user()->id)->with(['project', 'user'])->get();
         $issue = Task::where('type', 'Issue')->where('user_id', auth()->user()->id)
-        ->whereRelation('assignee', 'user_id', auth()->user()->id)
+        ->orWhereRelation('assignee', 'user_id', auth()->user()->id)
         ->count();
 
         $logs = ProjectLog::whereRelation('project.members', 'user_id', auth()->user()->id)

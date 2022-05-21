@@ -54,8 +54,8 @@
       <template v-slot:append>
         <v-list-item two-line class="mb-2">
           <v-list-item-avatar size="50" class="ma-0" color="primary">
-            <img class="cursor-pointer" v-if="user.info.profile_img" :src="`http://127.0.0.1:8000/images/profiles/${user.info.profile_img}`" />
-            <p v-else class="white--text font-weight-bold mb-0">{{ user.info.first_name[0] }}{{ user.info.last_name[0] }}</p>
+            <img class="cursor-pointer" v-if="user.info && user.info.image" :src="`http://127.0.0.1:8000/images/${user.info.image}`" />
+            <p v-else class="white--text font-weight-bold mb-0">{{ user.info && user.info.first_name[0] }}{{ user.info && user.info.last_name[0] }}</p>
           </v-list-item-avatar>
 
           <v-list-item-content class="ml-2 line-height-small">
@@ -122,7 +122,11 @@
       async logout() {
         this.btnLoading = true;
         const { status, data } = await this.$store.dispatch('auth/logout');
-        this.toastData(status, data);
+        if (status == 200) {
+          this.showToast(data.msg);
+        } else {
+          this.showToast(data, 'error');
+        }
         this.btnLoading = false;
         this.$router.push('/');
         this.logoutDialog = false;
@@ -136,12 +140,20 @@
           },
         })
           .then((response) => {
-            this.toastData(200, { msg: 'Profile image updated successfully!' });
+            this.showToast(response.data.msg);
           })
           .catch((error) => {
             console.log({ error });
           });
         await this.$store.dispatch('auth/checkUser');
+      },
+      showToast(msg, alertType = 'success', isVisible = true) {
+        const alert = {
+          msg: msg,
+          isVisible: isVisible,
+          alertType: alertType,
+        };
+        this.$store.commit('alert/setAlert', alert);
       },
     },
     computed: {

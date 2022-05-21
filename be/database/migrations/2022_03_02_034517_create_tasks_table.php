@@ -19,6 +19,7 @@ return new class extends Migration
             $table->longText('description')->nullable();
             $table->string('type', 50)->nullable();
             $table->string('status', 15)->nullable();
+            $table->dateTime('actual_finished_date')->nullable();
             $table->date('start_date')->nullable();
             $table->date('delivery_date')->nullable();
             $table->integer('order'); 

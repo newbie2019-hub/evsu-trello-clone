@@ -190,7 +190,7 @@
           <v-icon class="mr-2">mdi-lightning-bolt</v-icon>
           Task
         </v-card-title>
-        <v-textarea rows="1" background-color="grey lighten-4" auto-grow hide-details="auto" v-model="taskData.task" label="Task Name" class="pl-12 pr-6 ml-2" dense outlined> </v-textarea>
+        <v-textarea rows="1" auto-grow hide-details="auto" v-model="taskData.task" label="Task Name" class="pl-12 pr-6 ml-2" dense outlined> </v-textarea>
         <v-card-text class="pl-14 mt-2">
           This task is created by
           <span class="font-italic font-weight-bold">{{ getTaskOwner() }}</span> on {{ taskData.created_at }}<br />
@@ -205,7 +205,8 @@
                 <template v-slot:activator="{ on: tooltip }">
                   <v-btn small fab elevation="0" class="ml-1" v-bind="attrs" v-on="{ ...tooltip, ...menu }">
                     <v-avatar size="40" color="primary"
-                      ><span class="white--text">{{ assignee.info.first_name[0] }}{{ assignee.info.last_name[0] }}</span></v-avatar>
+                      ><span class="white--text">{{ assignee.info.first_name[0] }}{{ assignee.info.last_name[0] }}</span></v-avatar
+                    >
                   </v-btn>
                 </template>
                 <span>{{ assignee.info.first_name }} {{ assignee.info.last_name }}</span>
@@ -226,7 +227,15 @@
           <v-icon class="mr-2">mdi-card-bulleted</v-icon>
           Description
         </v-card-title>
-        <v-textarea rows="3" background-color="grey lighten-4" auto-grow hide-details="auto" label="Task Description" v-model="taskData.description" class="pl-14 pr-7" outlined> </v-textarea>
+        <v-textarea rows="3" auto-grow hide-details="auto" label="Task Description" v-model="taskData.description" class="pl-14 pr-7" outlined> </v-textarea>
+        <v-card-title class="text-h6 mt-2">
+          <v-icon class="mr-2">mdi-paperclip</v-icon>
+          Attachments
+        </v-card-title>
+        <v-row class="pl-14 mt-1 mb-8">
+          <label for="uploadimg" class="ml-3 v-btn v-btn--outlined v-btn--rounded theme--light v-size--default success--text cursor-pointer">Upload</label>
+          <input type="file" id="uploadimg" @change="uploadFile" />
+        </v-row>
         <v-card-title class="text-h6 mt-2">
           <v-icon class="mr-2">mdi-alert-octagon</v-icon>
           Task Info
@@ -236,7 +245,7 @@
             <v-menu ref="startdate" v-model="startMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
-                  background-color="grey lighten-3"
+                  
                   v-model="taskData.start_date"
                   label="Start Date"
                   append-icon="mdi-send-clock-outline"
@@ -257,7 +266,7 @@
             <v-menu ref="deliverydate" v-model="deliveryMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
-                  background-color="grey lighten-3"
+                 
                   v-model="taskData.delivery_date"
                   label="Delivery Date"
                   append-icon="mdi-send-clock-outline"
@@ -277,10 +286,10 @@
         </v-row>
         <v-row no-gutters class="pl-14 pr-7 mt-2">
           <v-col cols="10" sm="6" md="6" lg="6">
-            <v-select background-color="grey lighten-3" v-model="taskData.type" class="mr-2" :items="taskTypeItem" label="Task Type" outlined dense></v-select>
+            <v-select v-model="taskData.type" class="mr-2" :items="taskTypeItem" label="Task Type" outlined dense></v-select>
           </v-col>
           <v-col cols="10" sm="6" md="6" lg="6">
-            <v-select background-color="grey lighten-3" v-model="taskData.status" :items="taskStatusItem" label="Status" outlined dense></v-select>
+            <v-select v-model="taskData.status" :items="taskStatusItem" label="Status" outlined dense></v-select>
           </v-col>
         </v-row>
         <v-card-actions class="mt-5">
@@ -445,7 +454,7 @@
   import AddProjectMember from './components/AddProjectMember.vue';
   import ProjectLogDrawer from './components/ProjectLogDrawer.vue';
   import GanttChart from './components/GanttChart.vue';
-
+  import API from '@/store/base/'
   export default {
     data: () => ({
       items: [
@@ -630,7 +639,7 @@
         const { status, data } = await this.$store.dispatch('project/updateMemberRole', this.selectedProject);
         if (status == 200) {
           this.showToast('Member role updated successfully!');
-          await this.$store.dispatch('project/getSelectedProject', this.selected_project)
+          await this.$store.dispatch('project/getSelectedProject', this.selected_project);
         }
         this.setRoleDialog = false;
       },
@@ -771,7 +780,7 @@
         await this.$store.dispatch('project/updateBoardOrder', this.selected_project);
       },
       async updateTaskOrder(data) {
-        console.log(data.added);
+        // console.log(data.added);
         this.selected_project.boards.map((board, i) => {
           board.task.map((task, i) => {
             if (data.added && data.added.element.id == task.id) {
@@ -873,6 +882,22 @@
         }
         this.taskData.comment = '';
         await this.getProjectLogs();
+      },
+      async uploadFile(event) {
+        let formData = new FormData();
+        formData.append('file', event.target.files[0]);
+        await API.post(`upload-task-attachment`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+          .then((response) => {
+           console.log(response)
+          })
+          .catch((error) => {
+            console.log({ error });
+          });
+        await this.$store.dispatch('auth/checkUser');
       },
     },
     watch: {

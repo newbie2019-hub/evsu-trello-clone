@@ -33,6 +33,10 @@ class Task extends Model
         return $this->hasMany(TaskAssignee::class, 'task_id', 'id');
     }
 
+    public function attachment(){
+        return $this->hasMany(TaskAttachment::class, 'task_id', 'id');
+    }
+
     public function comments(){
         return $this->hasMany(TaskComment::class, 'task_id', 'id')->orderBy('created_at', 'desc');
     }

@@ -1,7 +1,0 @@
-Steps
-1. Locate an folder kun hain an imo project an tikang ha github 
-2. Open iton na folder ngan open dda hn cmd tapos git pull origin master
-3. Tapos check it status myda ton dda nakasurat kun may error or waray or kun nag failed ba an pag pull
-4. Pag success ha imo naka open na cmd change directory ka ha be ` cd be ` without quote ngan type php artisan migrate:fresh --seed
-5. Check nla an roles upon adding han member ht project maka click ka han avatar han user then myda dda remove ngna set role
-6. Upon hover ghap myda ton dda kun ano iya role
