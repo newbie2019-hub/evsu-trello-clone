@@ -44,7 +44,7 @@ class ProjectController extends Controller
         $project = Project::whereRelation('members', 'user_id', auth()->user()->id)->orWhere('user_id', auth()->user()->id)->with([
             'owner', 'owner.info', 'members', 'members.info', 'members.role', 'project_members.role', 'project_members.user', 'project_members.user.info',
             'boards', 'boards.task', 'boards.task.user', 'boards.task.user.info',
-            'boards.task.assignee', 'boards.task.assignee.info',
+            'boards.task.assignee', 'boards.task.assignee.info', 'boards.task.attachments',
             'boards.task.comments', 'boards.task.comments.user.info'
             ])->get();
         return response()->json($project);
@@ -54,7 +54,7 @@ class ProjectController extends Controller
         $project = Project::where('id', $request->id)->with([
             'owner', 'owner.info', 'members', 'members.info', 'members.role', 'project_members.role', 'project_members.user', 'project_members.user.info',
             'boards', 'boards.task', 'boards.task.user', 'boards.task.user.info',
-            'boards.task.assignee', 'boards.task.assignee.info',
+            'boards.task.assignee', 'boards.task.assignee.info', 'boards.task.attachments',
             'boards.task.comments', 'boards.task.comments.user.info'
             ])->first();
         return response()->json($project);

@@ -9,7 +9,7 @@
       <v-btn icon @click.prevent="setLogDrawerState" text v-if="$route.name == 'Project'">
         <v-icon size="25" color="blue darken-2">mdi-history</v-icon>
       </v-btn>
-      <v-menu v-if="user.info" transition="slide-y-transition" :close-on-content-click="false" content-class="elevation-3" v-model="showMenu" absolute bottom left style="max-width: 450px">
+      <!-- <v-menu v-if="user.info" transition="slide-y-transition" :close-on-content-click="false" content-class="elevation-3" v-model="showMenu" absolute bottom left style="max-width: 450px">
         <template v-slot:activator="{ on, attrs }">
           <v-btn icon text v-on="on" v-bind="attrs" color="blue darken-2">
             <v-icon>mdi-bell-outline</v-icon>
@@ -21,7 +21,7 @@
             <v-subheader>NOTIFICATIONS</v-subheader>
           </v-list>
         </v-card>
-      </v-menu>
+      </v-menu> -->
     </v-app-bar>
 
     <v-navigation-drawer class="pt-4 pl-0 pr-0 pb-2" width="235" elevation="1" v-model="drawer" app>

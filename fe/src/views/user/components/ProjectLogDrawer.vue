@@ -15,7 +15,7 @@
     </v-list-item-action>
    </v-list-item>
   </v-list>
-  <v-list v-if="projectActivity.data.length > 0">
+  <v-list v-if="projectActivity.data && projectActivity.data.length > 0">
    <v-timeline dense>
     <v-timeline-item small v-for="(activity, i) in projectActivity.data" :key="i">
      <template v-slot:icon>

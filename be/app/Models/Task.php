@@ -14,6 +14,7 @@ class Task extends Model
     protected $casts = [
         'created_at' => 'datetime:Y-m-d h:i A',
         'updated_at' => 'datetime:Y-m-d h:i A',
+        'actual_finished_date' => 'datetime:Y-m-d h:i A',
     ];
 
     protected function serializeDate(DateTimeInterface $date)
@@ -33,7 +34,7 @@ class Task extends Model
         return $this->hasMany(TaskAssignee::class, 'task_id', 'id');
     }
 
-    public function attachment(){
+    public function attachments(){
         return $this->hasMany(TaskAttachment::class, 'task_id', 'id');
     }
 

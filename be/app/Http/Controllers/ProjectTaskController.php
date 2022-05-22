@@ -7,8 +7,12 @@ use App\Models\Board;
 use App\Models\ProjectLog;
 use App\Models\Task;
 use App\Models\TaskAssignee;
+use App\Models\TaskAttachment;
 use App\Models\User;
+use App\Models\UserLog;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class ProjectTaskController extends Controller
 {
@@ -17,13 +21,49 @@ class ProjectTaskController extends Controller
         $this->middleware('auth:api');
     }
 
-    // public function index(){
-    //     $project = Task::with(['owner', 'owner.info', 'members', 'members.info', 'boards'])->get();
-    //     return response()->json($project);
-    // }
+    public function deleteAttachment(Request $request, $id){
+        $task = TaskAttachment::where('id', $id)->first();
+
+        if($task){
+            File::delete(public_path("attachment/".$task->filename));
+            $task->delete();
+        }
+
+        return response()->json(['msg' => 'Attachment deleted successfully!']);
+    }
+
+    public function downloadFileAttachment(Request $request){
+        $taskAttachment = TaskAttachment::where('id', $request->id)->first();
+        // return response()->json($request->all());
+        return response()->download(public_path('attachment/'. $taskAttachment->filename));
+    }
+    
+    public function fileAttachment(Request $request){
+        if($request->file){
+            $extension = $request->file->extension();
+            $fileName = time().'.'.$request->file->extension();
+            $request->file->move(public_path('attachment'), $fileName);
+
+            TaskAttachment::create([
+                'task_id' => $request->task_id,
+                'filename' => $fileName,
+                'extension' =>$extension
+            ]);
+
+            UserLog::create([
+                'log_name' => 'Attachment uploaded',
+                'event' => 'attachment',
+                'user_id' => auth('api')->user()->id,
+                'description' => 'You\'ve uploaded an attachment to a task.'
+            ]);
+
+            return $this->success('Upload successful!');
+        }
+    }
+
 
     public function getProjectTasks($id){
-        $tasks = Task::where('project_id', $id)->with(['user.info','project'])->get();
+        $tasks = Task::where('project_id', $id)->with(['user.info','project','attachments'])->get();
         // $tasks = User::whereRelation('tasks', 'project_id', $id)->with(['tasks', 'tasks.project', 'info'])->get();
         return $this->success('Data retrieved successfully!', $tasks);
     }
@@ -112,6 +152,12 @@ class ProjectTaskController extends Controller
         $task = Task::where('id', $id)->first();
 
         if($task){
+            if($request->status == 'Finished'){
+                $task->update([
+                    'actual_finished_date' => Carbon::now()
+                ]);
+            }
+            
             $task->update([
                 'task' => $request->task,
                 'description' => $request->description,

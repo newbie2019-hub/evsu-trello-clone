@@ -19,6 +19,7 @@ export default {
     }
   },
   mutations: {
+  
     SET_ROLES(state, payload) {
       state.roles = payload
     },
@@ -77,7 +78,7 @@ export default {
       state.selected_project.boards.map((board, b) => {
         board.task.map((task, t) => {
           task.assignee.map((assignee, a) => {
-            if(payload.id == assignee.info.id){
+            if (payload.id == assignee.info.id) {
               state.selected_project.boards[b].task[t].assignee.splice(a, 1)
             }
           })
@@ -85,8 +86,8 @@ export default {
       })
     },
     REMOVE_TASK(state, payload) {
-      state.selected_project.boards[payload.boardIndex].task.map((task, i) => { 
-        if(task.id == payload.id){
+      state.selected_project.boards[payload.boardIndex].task.map((task, i) => {
+        if (task.id == payload.id) {
           state.selected_project.boards[payload.boardIndex].task.splice(i, 1)
         }
       })
@@ -111,8 +112,8 @@ export default {
       state.selected_project.boards.push(payload)
     },
     UPDATE_BOARD(state, payload) {
-      state.selected_project.boards.map((board, i) => { 
-        if(board.id == payload.id){
+      state.selected_project.boards.map((board, i) => {
+        if (board.id == payload.id) {
           state.selected_project.boards[i].name = payload.name
           state.selected_project.boards[i].description = payload.description
           state.selected_project.boards[i].color = payload.color
@@ -121,8 +122,8 @@ export default {
       })
     },
     REMOVE_BOARD(state, payload) {
-      state.selected_project.boards.map((board, i) => { 
-        if(board.id == payload.id){
+      state.selected_project.boards.map((board, i) => {
+        if (board.id == payload.id) {
           state.selected_project.boards.splice(i, 1)
         }
       })
@@ -152,6 +153,34 @@ export default {
     }
   },
   actions: {
+    async exportFileAttachment({ commit }, payload) {
+      // const data = {
+      //   id: payload
+      // }
+      const res = await API.get(`/task/export?id=${ payload.id }`, {
+        headers:
+        {
+          'Content-Disposition': "attachment;",
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        },
+        responseType: 'arraybuffer',
+      }).then(res => {
+        return res;
+      }).catch(err => {
+        return err.response
+      })
+
+      return res;
+    },
+    async deleteFileAttachment({ commit }, payload) {
+      const res = await API.delete(`task/attachment/${ payload.id }`, payload).then(res => {
+        return res;
+      }).catch(error => {
+        return error.response;
+      })
+
+      return res;
+    },
     async getRoles({ commit }) {
       const res = await API.get('roles').then(res => {
         commit('SET_ROLES', res.data)
@@ -192,7 +221,7 @@ export default {
       return res;
     },
     async updateMemberRole({ commit }, payload) {
-      const res = await API.put(`project-member/${payload.project_id}`, payload).then(res => {
+      const res = await API.put(`project-member/${ payload.project_id }`, payload).then(res => {
         return res;
       }).catch(error => {
         return error.response;
@@ -220,8 +249,8 @@ export default {
 
       return res;
     },
-    async removeMember({ commit }, {project: project, member: payload, memberIndex: AI }) {
-      const res = await API.delete(`project/${project.id}/member/${ payload.id }`).then(res => {
+    async removeMember({ commit }, { project: project, member: payload, memberIndex: AI }) {
+      const res = await API.delete(`project/${ project.id }/member/${ payload.id }`).then(res => {
         commit('REMOVE_MEMBER', { stateData: payload, memberIndex: AI })
         commit('REMOVE_PROJECT_ASSIGNEE', { stateData: payload, memberIndex: AI })
         return res;
@@ -257,7 +286,7 @@ export default {
     },
     async deleteTask({ commit }, payload) {
       console.log(payload)
-      const res = await API.delete(`task/${payload.id}`).then(res => {
+      const res = await API.delete(`task/${ payload.id }`).then(res => {
         commit('REMOVE_TASK', payload)
         return res;
       }).catch(error => {
@@ -322,7 +351,7 @@ export default {
       return res;
     },
     async updateBoard({ commit }, payload) {
-      const res = await API.put(`board/${payload.id}`, payload).then(res => {
+      const res = await API.put(`board/${ payload.id }`, payload).then(res => {
         commit('UPDATE_BOARD', res.data.data)
         return res;
       }).catch(error => {

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('task_id')->constrained()->onDelete('cascade');
             $table->string('filename')->nullable();
+            $table->string('extension')->nullable();
             $table->timestamps();
         });
     }

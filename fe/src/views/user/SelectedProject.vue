@@ -55,12 +55,14 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-btn v-on="on" v-bind="attrs" small fab elevation="0" class="ml-1">
                   <v-avatar size="40" color="green darken-1"
-                    ><span class="white--text">{{ selected_project.owner.info.first_name[0] }}{{ selected_project.owner.info.last_name[0] }}</span></v-avatar
+                    ><span class="white--text"
+                      >{{ selected_project.owner && selected_project.owner.info.first_name[0] }}{{ selected_project.owner && selected_project.owner.info.last_name[0] }}</span
+                    ></v-avatar
                   >
                 </v-btn>
               </template>
               <span class=""
-                ><small>Owner - {{ selected_project.owner.info.first_name[0] }}. {{ selected_project.owner.info.last_name }}</small></span
+                ><small>Owner - {{ selected_project.owner && selected_project.owner.info.first_name[0] }}. {{ selected_project.owner && selected_project.owner.info.last_name }}</small></span
               >
             </v-tooltip>
             <v-btn v-if="selected_project.owner.id == user.id" @click.stop="addMemberDialog" small fab elevation="0" class="dashed-border ml-1">
@@ -70,8 +72,8 @@
         </v-col>
       </v-row>
 
-      <v-row class="mt-1 mb-3">
-        <v-col cols="12" sm="12" md="11" lg="11" xl="8">
+      <v-row no-gutters dense class="mt-1 mb-3">
+        <v-col cols="12" sm="12" md="12" lg="12" xl="10">
           <draggable v-model="selected_project.boards" :options="{ animation: 200 }" @change="updateBoardOrder" group="boards" class="boards-container">
             <v-card
               class="mr-5 rounded-lg"
@@ -228,12 +230,18 @@
           Description
         </v-card-title>
         <v-textarea rows="3" auto-grow hide-details="auto" label="Task Description" v-model="taskData.description" class="pl-14 pr-7" outlined> </v-textarea>
-        <v-card-title class="text-h6 mt-2">
+        <v-card-title class="text-h6 mt-2 pb-0">
           <v-icon class="mr-2">mdi-paperclip</v-icon>
           Attachments
         </v-card-title>
-        <v-row class="pl-14 mt-1 mb-8">
-          <label for="uploadimg" class="ml-3 v-btn v-btn--outlined v-btn--rounded theme--light v-size--default success--text cursor-pointer">Upload</label>
+        <p class="ml-14 mb-5">Click to view an attachment</p>
+        <v-layout class="pl-14 mb-4">
+          <a href="" type="button" @click.prevent="exportFileAttachment(attachment)" class="text-decoration-none mr-3" v-for="(attachment, i) in taskInfo.attachments" :key="i">
+            <v-chip close @click:close="deleteFileAttachment(attachment)"> {{ attachment.filename }} </v-chip>
+          </a>
+        </v-layout>
+        <v-row no-gutters class="pl-14 mt-1 mb-8">
+          <label for="uploadimg" class="v-btn v-btn--outlined v-btn--rounded theme--light v-size--default success--text cursor-pointer">Upload</label>
           <input type="file" id="uploadimg" @change="uploadFile" />
         </v-row>
         <v-card-title class="text-h6 mt-2">
@@ -245,7 +253,6 @@
             <v-menu ref="startdate" v-model="startMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
-                  
                   v-model="taskData.start_date"
                   label="Start Date"
                   append-icon="mdi-send-clock-outline"
@@ -254,23 +261,24 @@
                   v-bind="attrs"
                   v-on="on"
                   :loading="isLoading"
+                  :disabled="taskData.actual_finished_date != null ? true : false"
                   hide-details="auto"
                   dense
                   outlined
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="taskData.start_date" :active-picker.sync="activePickerStart" @change="saveStart"></v-date-picker>
+              <v-date-picker :readonly="taskData.actual_finished_date != null ? true : false" v-model="taskData.start_date" :active-picker.sync="activePickerStart" @change="saveStart"></v-date-picker>
             </v-menu>
           </v-col>
           <v-col cols="10" sm="6" md="6" lg="6">
             <v-menu ref="deliverydate" v-model="deliveryMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
-                 
                   v-model="taskData.delivery_date"
                   label="Delivery Date"
                   append-icon="mdi-send-clock-outline"
                   hide-details="auto"
+                  :disabled="taskData.actual_finished_date != null ? true : false"
                   class=""
                   readonly
                   v-bind="attrs"
@@ -280,18 +288,19 @@
                   outlined
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="taskData.delivery_date" :active-picker.sync="activePicker" @change="save"></v-date-picker>
+              <v-date-picker :readonly="taskData.actual_finished_date != null ? true : false" v-model="taskData.delivery_date" :active-picker.sync="activePicker" @change="save"></v-date-picker>
             </v-menu>
           </v-col>
         </v-row>
         <v-row no-gutters class="pl-14 pr-7 mt-2">
           <v-col cols="10" sm="6" md="6" lg="6">
-            <v-select v-model="taskData.type" class="mr-2" :items="taskTypeItem" label="Task Type" outlined dense></v-select>
+            <v-select hide-details="auto" v-model="taskData.type" class="mr-2" :items="taskTypeItem" label="Task Type" outlined dense></v-select>
           </v-col>
           <v-col cols="10" sm="6" md="6" lg="6">
-            <v-select v-model="taskData.status" :items="taskStatusItem" label="Status" outlined dense></v-select>
+            <v-select hide-details="auto" :disabled="taskData.actual_finished_date != null ? true : false" v-model="taskData.status" :items="taskStatusItem" label="Status" outlined dense></v-select>
           </v-col>
         </v-row>
+        <p class="ml-14"><small>Actual Finished Date: {{taskData.actual_finished_date}}</small></p>
         <v-card-actions class="mt-5">
           <v-spacer></v-spacer>
           <v-btn color="green darken-1" text @click="taskDialog = false"> Close </v-btn>
@@ -454,7 +463,7 @@
   import AddProjectMember from './components/AddProjectMember.vue';
   import ProjectLogDrawer from './components/ProjectLogDrawer.vue';
   import GanttChart from './components/GanttChart.vue';
-  import API from '@/store/base/'
+  import API from '@/store/base/';
   export default {
     data: () => ({
       items: [
@@ -565,6 +574,7 @@
         name: '',
       },
       taskData: {
+        attachments: [],
         boardName: '',
         comment: '',
         name: '',
@@ -635,6 +645,30 @@
     },
     components: { draggable, TaskComments, AddProjectMember, ProjectLogDrawer, GanttChart },
     methods: {
+      async deleteFileAttachment(file) {
+        this.isLoading = true;
+        const { status, data } = await this.$store.dispatch('project/deleteFileAttachment', file);
+        if (status == 200) {
+          this.showToast('File attachment has been removed!');
+          await this.$store.dispatch('project/getSelectedProject', this.selected_project);
+        } else {
+          this.showToast('Something went wrong!', 'error');
+        }
+        this.taskDialog = false;
+        this.isLoading = false;
+      },
+      async exportFileAttachment(file) {
+        this.isLoading = true;
+        const res = await this.$store.dispatch('project/exportFileAttachment', file);
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_';
+        link.setAttribute('download', file.filename);
+        document.body.appendChild(link);
+        link.click();
+        this.isLoading = false;
+      },
       async saveRole() {
         const { status, data } = await this.$store.dispatch('project/updateMemberRole', this.selectedProject);
         if (status == 200) {
@@ -671,9 +705,11 @@
         this.taskData.id = data.id;
         this.taskData.taskIndex = taskIndex;
         this.taskData.boardIndex = boardIndex;
+        this.taskData.attachments = data.attachments;
         this.taskData.task = data.task;
         this.taskData.description = data.description;
         this.taskData.start_date = data.start_date;
+        this.taskData.actual_finished_date = data.actual_finished_date;
         this.taskData.delivery_date = data.delivery_date;
         this.taskData.status = data.status;
         this.taskData.type = data.type;
@@ -886,18 +922,21 @@
       async uploadFile(event) {
         let formData = new FormData();
         formData.append('file', event.target.files[0]);
+        formData.append('task_id', this.taskData.id);
         await API.post(`upload-task-attachment`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         })
-          .then((response) => {
-           console.log(response)
+          .then(async (response) => {
+            this.taskDialog = false;
+            await this.$store.dispatch('project/getSelectedProject', this.selected_project);
+
+            console.log(response);
           })
           .catch((error) => {
             console.log({ error });
           });
-        await this.$store.dispatch('auth/checkUser');
       },
     },
     watch: {

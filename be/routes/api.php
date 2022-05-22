@@ -49,7 +49,7 @@ Route::middleware('api')->group(function () {
     });
     
     Route::get('dashboard', [DashboardController::class, 'index']);
-
+    
     Route::apiResource('project-member', ProjectMemberController::class);
     Route::delete('project/{projectid}/member/{id}', [ProjectController::class, 'removeProjectMember']);
     Route::get('project-dashboard/task', [ProjectController::class, 'dashboardProjectTask']);
@@ -61,6 +61,9 @@ Route::middleware('api')->group(function () {
     Route::post('board/update-name', [ProjectBoardController::class, 'updateName']);
     Route::apiResource('board', ProjectBoardController::class);
     
+    Route::post('upload-task-attachment', [ProjectTaskController::class, 'fileAttachment']);
+    Route::delete('task/attachment/{id}', [ProjectTaskController::class, 'deleteAttachment']);
+    Route::get('task/export', [ProjectTaskController::class, 'downloadFileAttachment']);
     Route::delete('task/assignee/{id}', [ProjectTaskController::class, 'removeTaskAssignee']);
     Route::post('task/assignee', [ProjectTaskController::class, 'updateTaskAssignee']);
     Route::post('task/update-order', [ProjectTaskController::class, 'updateOrder']);
