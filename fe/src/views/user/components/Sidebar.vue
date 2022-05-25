@@ -9,6 +9,10 @@
       <v-btn icon @click.prevent="setLogDrawerState" text v-if="$route.name == 'Project'">
         <v-icon size="25" color="blue darken-2">mdi-history</v-icon>
       </v-btn>
+      <v-btn @click.prevent="setChartState" text v-if="$route.name == 'Project'">
+        <v-icon size="25" color="blue lighten-1">mdi-chart-timeline-variant</v-icon>
+        &nbsp;Chart
+      </v-btn>
       <!-- <v-menu v-if="user.info" transition="slide-y-transition" :close-on-content-click="false" content-class="elevation-3" v-model="showMenu" absolute bottom left style="max-width: 450px">
         <template v-slot:activator="{ on, attrs }">
           <v-btn icon text v-on="on" v-bind="attrs" color="blue darken-2">
@@ -107,6 +111,10 @@
     }),
     async mounted() {},
     methods: {
+      setChartState() {
+        // console.log('hi');
+        this.$store.commit('project/SET_CHART_STATE', true);
+      },
       setLogDrawerState() {
         console.log('Clicked');
         this.$store.commit('logs/SET_LOG_STATE', true);

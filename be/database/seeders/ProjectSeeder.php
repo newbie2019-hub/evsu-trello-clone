@@ -21,7 +21,7 @@ class ProjectSeeder extends Seeder
                 'slug' => 'trello-x-jira-clone',
                 'description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
                 'start_date' => '2022-03-15',
-                'delivery_date' => '2022-08-15',
+                'delivery_date' => '2022-05-15',
                 'user_id' => 1
             ],
             [
