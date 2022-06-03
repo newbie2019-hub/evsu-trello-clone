@@ -262,7 +262,7 @@
       },
       isOverDue(date) {
         const currentDate = moment(Date.now()).format('YYYY-MM-DD');
-        const isSame = moment(currentDate).isSame(moment(date))
+        const isSame = moment(currentDate).isAfter(moment(date))
         return isSame
         // console.log(isSame);
       },
